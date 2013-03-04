@@ -7,7 +7,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </a>
-      <a href="{% url 'home' %}" class="brand" href="#">Your Site</a>
+      <a href="{% url 'home' %}" class="brand" href="#">Inventory</a>
       <div class="nav-collapse collapse">
         <ul class="nav">
           <li><a href="{% url 'home'%}">Home</a></li>
@@ -22,17 +22,6 @@
           <li><a>Logged in as {{ user.username }}</a></li>
         </ul>
         {% else %}
-        <ul class='nav pull-right'>
-          <li><form id="loginForm" class="navbar-form pull-right" action="{% url 'auth_login' %}" method="post">
-            {% csrf_token %}
-            <input class="span2" type="text" name="username" placeholder="Username" />
-            <input class="span2" type="password" name="password" placeholder="Password" />
-            <button type="submit" class="btn">Sign in</button>
-          </form>
-        </li>
-          
-          <li><a href="{% url 'registration_register' %}">Register</a></li>
-        </ul>
 
         {% endif %}
       </div><!--/.nav-collapse -->

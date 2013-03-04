@@ -13,7 +13,7 @@
 </div>
 {% endif %}
 
-<form method="post" action="{% url 'auth_login' %}">{% csrf_token %}
+<form id="loginForm" method="post" action="{% url 'auth_login' %}">{% csrf_token %}
     <dl>
         <dt><label for="id_username">Username:</label>{% if form.username.errors %} <span class="error">{{ form.username.errors|join:", " }}</span>{% endif %}</dt>
         <dd>{{ form.username }}</dd>

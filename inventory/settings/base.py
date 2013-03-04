@@ -67,6 +67,7 @@ INTERNAL_APPS = [
     'inventory.base',
 
     # Local apps, referenced via inventory.appname
+    'inventory.devices',
 ]
 
 INSTALLED_APPS = EXTERNAL_APPS + INTERNAL_APPS
@@ -212,4 +213,4 @@ FILE_UPLOAD_PERMISSIONS = 0664
 WSGI_APPLICATION = 'inventory.wsgi.application'
 
 # URL to redirect to after logging in 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/devices'
