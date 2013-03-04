@@ -6,7 +6,10 @@ from inventory.devices.models import Device
 
 class DeviceTest(TestCase):
     def test_model(self):
-        device = Device.objects.create(name='iPad',
-                                status='Checked in')
+        device = DeviceFactory()
         assert_true(device.pk)
         assert_true(device.status)
+        assert_true(device.created_at)
+        assert_true(device.updated_at)
+        assert_false(device.lendee)
+        assert_false(device.lender)
