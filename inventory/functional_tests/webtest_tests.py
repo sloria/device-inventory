@@ -18,7 +18,6 @@ class TestAUser(WebTest):
         assert_equal(res.status_code, 200)
         assert_in('Inventory', res)
 
-
     def test_can_login(self):
         # Rosie goes to root
         res = self.app.get('/')
@@ -44,7 +43,8 @@ class TestAUser(WebTest):
         # She is taken to the inventory page
         assert_equal(res.request.path, '/devices/')
 
-    def test_can_see_devices(self):
-        pass
-
-
+class TestASuperUser(WebTest):
+    def setUp(self):
+        self.user = UserFactory()
+        self.is_superuser = True
+        self.user.save()

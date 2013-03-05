@@ -68,6 +68,7 @@ INTERNAL_APPS = [
 
     # Local apps, referenced via inventory.appname
     'inventory.devices',
+    'inventory.user',
 ]
 
 INSTALLED_APPS = EXTERNAL_APPS + INTERNAL_APPS
