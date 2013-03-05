@@ -24,7 +24,7 @@ class Experimenter(models.Model):
     user = models.OneToOneField(User, unique=True)
 
     def __unicode__(self):
-        return unicode(self.name)
+        return unicode(self.user)
 
     def save(self, *args, **kwargs):
         '''Add permission to change device status 

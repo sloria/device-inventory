@@ -1,1 +1,16 @@
 {% extends "base.html" %}
+{% load url from future %}
+{% block content_class %}container{% endblock content_class %}
+{% block content %}
+  <h1 class="page-title center">Devices</h1>
+  <div class="btn-toolbar">
+    {% if user.is_authenticated %}
+        {% if perms.devices.add_device %}
+        <a href="{% url 'devices:add' %}" class="btn">
+          <i class="icon-plus"></i>
+          Add device    
+        {% endif %}
+        </a>
+    {% endif %}
+  </div>
+{% endblock content %}
