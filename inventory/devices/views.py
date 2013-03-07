@@ -2,7 +2,7 @@
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.shortcuts import redirect
-from django.views.generic import ListView, FormView
+from django.views.generic import ListView, FormView, CreateView, DeleteView
 
 from inventory.devices.models import Device
 from inventory.devices.forms import DeviceForm
@@ -21,7 +21,7 @@ class DevicesListView(ListView):
         else:
             return redirect('home')
 
-class DeviceAdd(FormView):
+class DeviceAdd(CreateView):
     form_class = DeviceForm
     template_name = 'devices/add.html'
     success_url = reverse_lazy('devices:index')
@@ -33,5 +33,15 @@ class DeviceAdd(FormView):
             return super(DeviceAdd, self).get(self, request)
         else:
             return redirect('devices:permission_denied')
+
+class DeviceDelete(DeleteView):
+    ''' View for deleting a single instance.
+    '''
+    model = Device
+    template_name = 'devices/delete.html'
+    context_object_name = 'object'
+
+    def get_success_url(self):
+        return reverse_lazy('devices:index')
 
 

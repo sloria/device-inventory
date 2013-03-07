@@ -17,5 +17,11 @@ urlpatterns = patterns('',
     url(r'^permissions/denied/$',
         TemplateView.as_view(template_name='403.html'),
         name='permission_denied'
-        )
+        ),
+    
+    # ex: /devices/3/delete/
+    url(r'^(?P<pk>\d)/delete/$',
+        DeviceDelete.as_view(),
+        name='delete'
+        ),
 )

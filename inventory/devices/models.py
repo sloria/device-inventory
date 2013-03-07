@@ -86,6 +86,9 @@ class Device(models.Model):
     def __unicode__(self):
         return unicode("name: {}, status: {}".format(self.name, self.status))
 
+    def get_cname(self):
+        return 'device'
+        
     class Meta:
         permissions = (
             ('can_change_device_status', "Can change device status"),

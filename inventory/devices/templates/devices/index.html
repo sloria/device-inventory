@@ -2,15 +2,41 @@
 {% load url from future %}
 {% block content_class %}container{% endblock content_class %}
 {% block content %}
-  <h1 class="page-title center">Devices</h1>
-  <div class="btn-toolbar">
-    {% if user.is_authenticated %}
-        {% if perms.devices.add_device %}
-        <a href="{% url 'devices:add' %}" class="btn">
-          <i class="icon-plus"></i>
-          Add device    
-        {% endif %}
-        </a>
-    {% endif %}
-  </div>
+<h1 class="page-title center">Devices</h1>
+<div class="btn-toolbar">
+  {% if user.is_authenticated %}
+  {% if perms.devices.add_device %}
+  <a href="{% url 'devices:add' %}" class="btn">
+    <i class="icon-plus"></i>
+    Add device    
+  </a>
+  {% endif %}
+  
+  {% if all_devices.count %}  
+  <table class='table table-striped'>
+    <thead>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Lendee</th>
+      <th>Lender</th>
+      <th>Serial number</th>
+      <th></th>
+    </thead>
+    {% for device in all_devices %}
+    <tbody>
+      <td>{{ device.name }}</td>
+      <td>{{ device.get_status_display }}</td>
+      <td>{{ device.lendee }}</td>
+      <td>{{ device.lender }}</td>
+      <td>{{ device.serial_number }}</td>
+      <td><a href="{% url 'devices:delete' device.pk %}">Delete</a></td>
+    </tbody>
+    {% endfor %}
+  </table>
+  {% else %}
+  <h2>No devices</h2>
+  {% endif %}
+
+  {% endif %}
+</div>
 {% endblock content %}
