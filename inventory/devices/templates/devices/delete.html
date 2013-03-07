@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% load url from future %}
 {% block content %}
-<div class="container">
 <h1 class="center">Delete {{ object.get_cname|capfirst }}</h1>
-<div class="block">
     <div class="block-heading">Are you sure that you would like to delete this {{ object.get_cname }}?</div>
     <div class="btn-group">
         <form id='deleteConfirm' method="POST" action=".">
@@ -12,6 +10,5 @@
         </form>
         <a href="{% url 'devices:index' %}" class="btn">No</a>
     </div>
-</div>
 </div>
 {% endblock content %}

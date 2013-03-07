@@ -1,4 +1,4 @@
-from factory import Factory, SubFactory
+from factory import Factory, SubFactory, Sequence
 from inventory.user.tests.factories import UserFactory
 from inventory.devices.models import *
 from django.utils import timezone
@@ -9,7 +9,7 @@ class DeviceFactory(Factory):
     name = 'iPad 4, 16GB, WiFi'
     status = Device.CHECKED_IN
     make = 'PD510LL/A iPad WiFi 16BG / Black'
-    serial_number = 'DMRJM1XTF182'
+    serial_number = Sequence(lambda n: 'DMRJM1XTF182{0}'.format(n))
 
 
 class ExperimenterFactory(Factory):

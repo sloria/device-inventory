@@ -1,6 +1,7 @@
 '''Functional tests using WebTest'''
 
 from django_webtest import WebTest
+import unittest
 from nose.tools import *
 from inventory.user.tests.factories import UserFactory
 from inventory.devices.tests.factories import *
@@ -65,6 +66,16 @@ class TestAnExperimenter(WebTest):
         # sees a not authorized warning
         assert_in('Forbidden', res)
 
+    def test_cannot_remove_device(self):
+        # a device is created
+        device1 = DeviceFactory()
+        # goes to devices page
+        res = self.app.get('/', user=self.experimenter.user).follow()
+        # cannot select 'Delete device' (raises ValuError)
+        form = res.forms['deviceControl']
+        with assert_raises(ValueError):
+            form['action'] = 'delete_selected'
+
     def test_can_see_devices(self):
         # a device is already created
         device = DeviceFactory()
@@ -72,6 +83,18 @@ class TestAnExperimenter(WebTest):
         res = self.app.get('/', user=self.experimenter.user).follow()
         # sees the device name
         res.mustcontain(device.name, device.get_status_display(), device.serial_number)
+
+    @unittest.skip('TODO')
+    def test_can_checkout_device(self):
+        # two devices are already created
+        device1 = DeviceFactory()
+        device2 = DeviceFactory()
+        assert_equal(Device.objects.all().count(), 2)
+        # goes to devices page
+        res = self.app.get('/', user=self.experimenter.user).follow()
+        # checks the first device
+        form = res.forms['deviceControl']
+        form['select_device{}'.format(device1.pk)] = True
 
 class TestASuperUser(WebTest):
     def setUp(self):
@@ -116,25 +139,32 @@ class TestASuperUser(WebTest):
         res.mustcontain('Name', 'Status', 'Lender', 'Lendee', 'Serial number')
         res.mustcontain('iPad 4, 16GB, WiFi', 'Storage', '12345X67')
 
-    def test_can_remove_device(self):
-        # A device is already created
-        DeviceFactory()
-        assert_equal(Device.objects.all().count(), 1)
-        # goes to index page
+
+    def test_can_remove_devices(self):
+        # 3 devices are created
+        device1, device2, device3 = DeviceFactory(), DeviceFactory(), DeviceFactory()
+        assert_equal(Device.objects.all().count(), 3)
+        # user goes to index page
         res = self.app.get('/', user=self.admin).follow()
-        assert_in('Delete', res)
-        # clicks delete button
-        res = res.click('Delete')
-        # Taken to confirmation dialog
-        assert_in('Are you sure', res)
-        # clicks Yes
-        form = res.forms['deleteConfirm']
+        # devices are listed
+        assert_in(device1.serial_number, res)
+        assert_in(device2.serial_number, res)
+        # selects first two devices
+        form = res.forms['deviceControl']
+        form.set('device_select', True, index=0)
+        form.set('device_select', True, index=1)
+        # selects delete action
+        form.set('action', 'delete_selected')
+        # submits
         res = form.submit().follow()
-        # Back to the index
-        # No devices
-        assert_in('No devices', res)
-        # delete was saved to database
-        assert_equal(Device.objects.all().count(), 0)
+        # devices no longer appear
+        assert_not_in(device1.serial_number, res)
+        assert_not_in(device2.serial_number, res)
+        # a success alert appears
+        assert_in('Successfully deleted 2 devices', res)
+        # devices were deleted from database
+        assert_equal(Device.objects.all().count(), 1)
+
 
 class TestAReader(WebTest):
     def setUp(self):
@@ -151,7 +181,6 @@ class TestAReader(WebTest):
         # tries to go directly to the add device page
         res = self.app.get('/devices/add/', user=self.reader.user).follow()
         # sees a not authorized warning
-        # res.showbrowser()
         assert_in('Forbidden', res)
 
     def test_can_see_devices(self):
@@ -161,6 +190,16 @@ class TestAReader(WebTest):
         res = self.app.get('/', user=self.reader.user).follow()
         # sees the device name
         res.mustcontain(device.name, device.get_status_display(), device.serial_number)
+
+    def test_cannot_remove_device(self):
+        # a device is created
+        device1 = DeviceFactory()
+        # goes to devices page
+        res = self.app.get('/', user=self.reader.user).follow()
+        # cannot select 'Delete device' (raises ValuError)
+        form = res.forms['deviceControl']
+        with assert_raises(ValueError):
+            form['action'] = 'delete_selected'
 
 
 

@@ -1,8 +1,8 @@
 # Create your views here.
-from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.core.urlresolvers import reverse_lazy
 from django.shortcuts import redirect
-from django.views.generic import ListView, FormView, CreateView, DeleteView
+from django.contrib import messages
+from django.views.generic import ListView, CreateView, DeleteView
 
 from inventory.devices.models import Device
 from inventory.devices.forms import DeviceForm
@@ -21,7 +21,23 @@ class DevicesListView(ListView):
         else:
             return redirect('home')
 
+    def post(self, request):
+        """Process the action for the selected devices.
+        """
+        action = request.POST['action']  # the selected action
+        selected_pks = [int(v) for v in request.POST.getlist('device_select')]
+        # Get the selected Device objects
+        selected_devices = Device.objects.filter(pk__in=selected_pks)
+
+        if action == 'delete_selected': 
+            selected_devices.delete() # delete selected
+            messages.success(request, 
+                    'Successfully deleted {} devices'.format(len(selected_pks)))
+        return redirect('devices:index')
+
 class DeviceAdd(CreateView):
+    '''View for adding a device.
+    '''
     form_class = DeviceForm
     template_name = 'devices/add.html'
     success_url = reverse_lazy('devices:index')
