@@ -1,7 +1,7 @@
-
-# Inventory Project #
+# A simple device inventory #
 
 ## About ##
+A simple Django app for device asset management.
 
 ## Prerequisites ##
 
@@ -17,16 +17,15 @@
 - `$ pip install -r requirements/dev.txt`
 - `$ cp inventory/settings/local-dist.py sepal/settings/local.py` (so that local.py won't be added
   to your source control)
-- Edit local.py with your local database settings.
+-  Edit local.py with your local database settings (only if using something other than sqlite).
 - `$ python manage.py syncdb`
 -  Perform any necessary migrations
+    - e.g. `$ python manage.py migrate devices`
 - `$ python manage.py runserver`
-
 
 ## Running tests ##
 - Run tests using `$ fab test`
-- In order to test sending email, you can create a dummy SMTP server using `$ python -m smtpd -n -c DebuggingServer localhost:1025`
-
+- To use watchdog (for CI), `$ ./bin/watchmedo.sh`.
 
 License
 -------
