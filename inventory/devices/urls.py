@@ -24,4 +24,9 @@ urlpatterns = patterns('',
         DeviceDelete.as_view(),
         name='delete'
         ),
+
+    # ex: /devices/3/checkout
+    url(r'^(?P<pk>\d)/checkout/$',
+        DeviceCheckout.as_view(),
+        name='checkout')
 )

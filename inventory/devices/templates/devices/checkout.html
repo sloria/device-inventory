@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block content %}
+<h1>Select Lendee</h1>
+<ul>
+    <form id='lendee_select_form' action="" method='post'>{% csrf_token %}   
+    {% for lendee in lendees %}
+    <input type="radio" name="lendee_select" value="{{ lendee.pk }}">
+    {{ lendee.get_last_name_first }}</li>
+    {% endfor %}   
+    <button type="submit" class='btn btn-submit'>Submit</button>
+    </form>
+</ul>
+{% endblock content %}

@@ -46,6 +46,9 @@ class Lendee(models.Model):
     def __unicode__(self):
         return unicode(self.user)
 
+    def get_last_name_first(self):
+        return "{}, {}".format(self.user.last_name, self.user.first_name)
+
 class Reader(models.Model):
     '''A reader. Can only view devices (cannot add/delete/change/status).
     '''

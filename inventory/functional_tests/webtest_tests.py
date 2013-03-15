@@ -68,7 +68,7 @@ class TestAnExperimenter(WebTest):
 
     def test_cannot_remove_device(self):
         # a device is created
-        device1 = DeviceFactory()
+        DeviceFactory()
         # goes to devices page
         res = self.app.get('/', user=self.experimenter.user).follow()
         # cannot select 'Delete device' (raises ValuError)
@@ -84,17 +84,54 @@ class TestAnExperimenter(WebTest):
         # sees the device name
         res.mustcontain(device.name, device.get_status_display(), device.serial_number)
 
-    @unittest.skip('TODO')
     def test_can_checkout_device(self):
         # two devices are already created
-        device1 = DeviceFactory()
-        device2 = DeviceFactory()
+        DeviceFactory(serial_number='123')
+        DeviceFactory()
+
+        user_lendee = UserFactory(username="lendee1", first_name='Lois', last_name='Lendee')
+        lendee1 = LendeeFactory(user=user_lendee)
         assert_equal(Device.objects.all().count(), 2)
         # goes to devices page
         res = self.app.get('/', user=self.experimenter.user).follow()
         # checks the first device
         form = res.forms['deviceControl']
-        form['select_device{}'.format(device1.pk)] = True
+        form.set('device_select', True, index=0)
+        # Selects Checkout device
+        form.set('action', 'checkout_selected')
+        # Submits
+        res = form.submit().follow()
+        # taken to a page with a list of lendees
+        assert_in('Select Lendee', res)
+        assert_in('Lendee, Lois', res)
+        form = res.forms['lendee_select_form']
+        # Selects the radio button for one of the lendees
+        form['lendee_select'] = '1' # selects lendee with pk 1
+        # Submits
+        res = form.submit().follow()
+        # Redirected to the devices page
+        # The Lendee and Lender have been updated on the page and in the DB
+        assert_in('Lendee, Lois', res)
+        assert_in(self.experimenter.user.username, res)
+        device = Device.objects.get(serial_number='123')
+        assert_equal(device.lendee, lendee1)
+
+    def test_cannot_checkout_multiple_devices(self):
+        # two devices created
+        DeviceFactory()
+        DeviceFactory()
+        res = self.app.get('/', user=self.experimenter.user).follow()
+        # checks both devices
+        # checks the first device
+        form = res.forms['deviceControl']
+        form.set('device_select', True, index=0)
+        form.set('device_select', True, index=1)
+        # Selects Checkout device
+        form.set('action', 'checkout_selected')
+        # Submits
+        res = form.submit().follow()
+        # An error message appears
+        assert_in('Cannot check out more than one device at a time', res)
 
 class TestASuperUser(WebTest):
     def setUp(self):
@@ -165,6 +202,13 @@ class TestASuperUser(WebTest):
         # devices were deleted from database
         assert_equal(Device.objects.all().count(), 1)
 
+    def test_can_create_users(self):
+        # logs in 
+        res = self.app.get('/', user=self.admin).follow()
+        # Clicks on create new user
+        res = res.click('Create user')
+        assert False, 'finish me'
+
 
 class TestAReader(WebTest):
     def setUp(self):
@@ -193,7 +237,7 @@ class TestAReader(WebTest):
 
     def test_cannot_remove_device(self):
         # a device is created
-        device1 = DeviceFactory()
+        DeviceFactory()
         # goes to devices page
         res = self.app.get('/', user=self.reader.user).follow()
         # cannot select 'Delete device' (raises ValuError)
@@ -201,5 +245,14 @@ class TestAReader(WebTest):
         with assert_raises(ValueError):
             form['action'] = 'delete_selected'
 
+    def test_cannot_checkout_device(self):
+        # a device is created
+        DeviceFactory()
+        # goes to devices page
+        res = self.app.get('/', user=self.reader.user).follow()
+        # cannot select 'Delete device' (raises ValuError)
+        form = res.forms['deviceControl']
+        with assert_raises(ValueError):
+            form['action'] = 'checkout_selected'
 
 

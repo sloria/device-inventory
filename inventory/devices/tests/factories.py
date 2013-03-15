@@ -22,3 +22,7 @@ class ReaderFactory(Factory):
 
     user = SubFactory(UserFactory)
     
+class LendeeFactory(Factory):
+    FACTORY_FOR = Lendee
+
+    user = SubFactory(UserFactory)

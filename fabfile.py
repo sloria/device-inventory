@@ -210,6 +210,15 @@ def deploy():
     webserver_start()
 
 @task
+def watchmedo():
+    """
+    Watches the file system for changes of ``*.py`` files and executes the tests
+    whenever you save a file.
+    """ 
+    cmd = "watchmedo shell-command --recursive --ignore-directories --patterns='*.py' --wait --command='fab test:integration=1,selenium=0' ."
+    local(cmd)
+
+@task
 def test(unit=1, integration=1, functional=1, selenium=0, all=0):
     """
     Central command for running tests.
