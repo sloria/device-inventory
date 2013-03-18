@@ -11,6 +11,12 @@
     Add device    
   </a>
   {% endif %}
+  {% if perms.user.add_user %}
+  <a href="{% url 'users:add' %}" class="btn">
+    <i class="icon-plus"></i>
+    Create user    
+  </a>    
+  {% endif %}
   
   {% if all_devices.count %}  
   <form method="post" id="deviceControl" action="">

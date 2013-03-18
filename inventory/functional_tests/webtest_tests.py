@@ -1,11 +1,14 @@
 '''Functional tests using WebTest'''
 
+from django.contrib.auth.models import User
 from django_webtest import WebTest
 import unittest
 from nose.tools import *
-from inventory.user.tests.factories import UserFactory
-from inventory.devices.tests.factories import *
+from inventory.user.tests.factories import (UserFactory, ExperimenterFactory,
+                                             ReaderFactory, LendeeFactory)
+from inventory.devices.tests.factories import DeviceFactory
 from inventory.devices.models import Device
+from inventory.user.models import Experimenter, Reader
 
 class TestAUser(WebTest):
 
@@ -31,7 +34,7 @@ class TestAUser(WebTest):
         # Rosie goes to root
         res = self.app.get('/')
         # Rosie logs in
-        form = res.forms['loginForm']
+        form = res.forms['login_form']
         form['username'] = self.user.username
         form['password'] = 'abc'
         res = form.submit()
@@ -55,6 +58,22 @@ class TestAUser(WebTest):
 class TestAnExperimenter(WebTest):
     def setUp(self):
         self.experimenter = ExperimenterFactory()
+
+    def test_can_login(self):
+        user = self.experimenter.user
+        # goes to root (not logged in)
+        res = self.app.get('/')
+        form = res.forms['login_form']
+        # fills in login info
+        form['username'] = user.username
+        form['password'] = 'abc'
+        # submits
+        res = form.submit().follow()
+        # redirected to devices
+        assert_equal(res.request.path, '/devices')
+        assert_true(user.is_authenticated())
+        # i'm an experimenter, so I can't create a user
+        assert_not_in('Create user', res)
 
     def test_cannot_create_device(self):
         # goes to root (logged in)
@@ -133,6 +152,24 @@ class TestAnExperimenter(WebTest):
         # An error message appears
         assert_in('Cannot check out more than one device at a time', res)
 
+    def test_cannot_create_users(self):
+        # logs in 
+        res = self.app.get('/', user=self.experimenter.user).follow()
+        assert_not_in('Create user', res)
+
+    def test_can_checkin_a_device(self):
+        # A device is created
+        device = DeviceFactory(status=Device.CHECKED_OUT)
+        # logs in
+        res = self.app.get('/', user=self.experimenter.user).follow()
+        # at the index page, there's a device that's checked out
+        assert_in('Checked out', res)
+        # selects the device
+        # Selects the Check In action
+        # submits
+        # ....
+        assert False, 'finish me'
+
 class TestASuperUser(WebTest):
     def setUp(self):
         self.admin = UserFactory()
@@ -176,7 +213,6 @@ class TestASuperUser(WebTest):
         res.mustcontain('Name', 'Status', 'Lender', 'Lendee', 'Serial number')
         res.mustcontain('iPad 4, 16GB, WiFi', 'Storage', '12345X67')
 
-
     def test_can_remove_devices(self):
         # 3 devices are created
         device1, device2, device3 = DeviceFactory(), DeviceFactory(), DeviceFactory()
@@ -202,17 +238,100 @@ class TestASuperUser(WebTest):
         # devices were deleted from database
         assert_equal(Device.objects.all().count(), 1)
 
-    def test_can_create_users(self):
+    def test_can_create_experimenter(self):
         # logs in 
         res = self.app.get('/', user=self.admin).follow()
         # Clicks on create new user
         res = res.click('Create user')
-        assert False, 'finish me'
+        # Fills out form to create a new user
+        form = res.forms['user_form']
+        # Sets the user type
+        form.set('user_type', 'experimenter')
+        form['first_name'] = 'Jimmy'
+        form['last_name'] = 'Page'
+        form['email'] = 'jimmy@example.com'
+        form['password1'] = 'ledzep12'
+        form['password2'] = 'ledzep12'
+        # Submits
+        res = form.submit().follow()
+        # Back at the devices page
+        assert_equal(res.request.path, '/devices/')
+        # Sees success message
+        assert_in('Successfully created user: jimmy@example.com', res)
+        # User is saved to database
+        assert_equal(Experimenter.objects.all().count(), 1)
+        new_experimenter = Experimenter.objects.get(user__username='jimmy@example.com')
+        assert_equal(new_experimenter.user.get_full_name(), 'Jimmy Page')
 
+    def test_can_create_reader(self):
+        # logs in 
+        res = self.app.get('/', user=self.admin).follow()
+        # Clicks on create new user
+        res = res.click('Create user')
+        # Fills out form to create a new user
+        form = res.forms['user_form']
+        # Sets the user type
+        form.set('user_type', 'reader')
+        form['first_name'] = 'Jimmy'
+        form['last_name'] = 'Page'
+        form['email'] = 'jimmy@example.com'
+        form['password1'] = 'ledzep12'
+        form['password2'] = 'ledzep12'
+        # Submits
+        res = form.submit().follow()
+        # Back at the devices page
+        assert_equal(res.request.path, '/devices/')
+        # Sees success message
+        assert_in('Successfully created user: jimmy@example.com', res)
+        # User is saved to database
+        assert_equal(Reader.objects.all().count(), 1)
+        new_reader = Reader.objects.get(user__username='jimmy@example.com')
+        assert_equal(new_reader.user.get_full_name(), 'Jimmy Page')
+
+    def test_can_create_admin(self):
+        # logs in 
+        res = self.app.get('/', user=self.admin).follow()
+        # Clicks on create new user
+        res = res.click('Create user')
+        # Fills out form to create a new user
+        form = res.forms['user_form']
+        # Sets the user type
+        form.set('user_type', 'admin')
+        form['first_name'] = 'Jimmy'
+        form['last_name'] = 'Page'
+        form['email'] = 'jimmy@example.com'
+        form['password1'] = 'ledzep12'
+        form['password2'] = 'ledzep12'
+        # Submits
+        res = form.submit().follow()
+        # Back at the devices page
+        assert_equal(res.request.path, '/devices/')
+        # Sees success message
+        assert_in('Successfully created user: jimmy@example.com', res)
+        # User is saved to database
+        new_admin = User.objects.get(username='jimmy@example.com')
+        assert_equal(new_admin.get_full_name(), 'Jimmy Page')
+        assert_true(new_admin.is_superuser)
 
 class TestAReader(WebTest):
     def setUp(self):
         self.reader = ReaderFactory()
+
+    def test_can_login(self):
+        user = self.reader.user
+        # goes to root (not logged in)
+        res = self.app.get('/')
+        form = res.forms['login_form']
+        # fills in login info
+        form['username'] = user.username
+        form['password'] = 'abc'
+        # submits
+        res = form.submit().follow()
+        # redirected to devices
+        assert_equal(res.request.path, '/devices')
+        assert_true(user.is_authenticated())
+        # i'm an reader, so I can't create a user
+        assert_not_in('Create user', res)
 
     def test_cannot_create_device(self):
         # goes to root (logged in)
@@ -254,5 +373,10 @@ class TestAReader(WebTest):
         form = res.forms['deviceControl']
         with assert_raises(ValueError):
             form['action'] = 'checkout_selected'
+
+    def test_cannot_create_users(self):
+        # logs in 
+        res = self.app.get('/', user=self.reader.user).follow()
+        assert_not_in('Create user', res)
 
 

@@ -13,7 +13,7 @@
 </div>
 {% endif %}
 
-<form id="loginForm" method="post" action="{% url 'auth_login' %}">{% csrf_token %}
+<form id="login_form" method="post" action="{% url 'auth_login' %}">{% csrf_token %}
     <dl>
         <dt><label for="id_username">Username:</label>{% if form.username.errors %} <span class="error">{{ form.username.errors|join:", " }}</span>{% endif %}</dt>
         <dd>{{ form.username }}</dd>
@@ -23,8 +23,3 @@
     </dl>
 </form>
 {% endblock content %}
-
-{% block content-related %}
-<p>If you don't have an account, you can <a href="/accounts/register/">sign
-    up</a> for one.
-    {% endblock %}
