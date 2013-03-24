@@ -16,6 +16,13 @@ class Device(models.Model):
     STORAGE = 'ST'
     BROKEN = 'BR'
     MISSING = 'MI'
+
+    # Other constants for condition
+    EXCELLENT = 'EX'
+    SCRATCHED = 'SC'
+
+
+    # Define possible choices for Status field
     STATUS_CHOICES = (
         (CHECKED_IN, 'Checked in'),
         (CHECKED_OUT, 'Checked out'),
@@ -24,17 +31,26 @@ class Device(models.Model):
         (MISSING, 'Missing'),
     )
 
+    # Define possible choices for condition field
+    CONDITION_CHOICES = (
+        (EXCELLENT, 'Excellent'),
+        (SCRATCHED, 'Scratched'),
+        (BROKEN, 'Broken'),
+        (MISSING, 'Missing'),
+    )
+
     name = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)
     responsible_party = models.CharField(max_length=100, null=True, blank=True)
     make = models.CharField(max_length=200)
-    serial_number = models.CharField(max_length=200)
+    serial_number = models.CharField(max_length=200, unique=True)
     status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=STORAGE)
+    condition = models.CharField(max_length=2, choices=CONDITION_CHOICES, default=EXCELLENT)
     purchased_at = models.DateTimeField('Date purchased', default=timezone.now())
     created_at = models.DateTimeField('created at', default=timezone.now())
     updated_at = models.DateTimeField('updated at', default=timezone.now())
-    lendee = models.OneToOneField(Lendee, null=True, blank=True)
-    lender = models.OneToOneField(User, null=True, blank=True)
+    lendee = models.ForeignKey(Lendee, null=True, blank=True, unique=False)
+    lender = models.ForeignKey(User, null=True, blank=True, unique=False)
 
     def __unicode__(self):
         return unicode("name: {}, status: {}".format(self.name, self.status))

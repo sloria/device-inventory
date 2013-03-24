@@ -4,6 +4,7 @@
 {% block content %}
 <h1>Select Lendee</h1>
 <ul>
+    {% if lendees %}
     <form id='lendee_select_form' action="" method='post'>{% csrf_token %}   
     {% for lendee in lendees %}
     <input type="radio" name="lendee_select" value="{{ lendee.pk }}">
@@ -11,5 +12,10 @@
     {% endfor %}   
     <button type="submit" class='btn btn-submit'>Submit</button>
     </form>
+    {% else %}
+    <p>
+        No lendees available! 
+    </p>
+    {% endif %}
 </ul>
 {% endblock content %}

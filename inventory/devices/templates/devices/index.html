@@ -19,13 +19,14 @@
   {% endif %}
   
   {% if all_devices.count %}  
-  <form method="post" id="deviceControl" action="">
+  <form method="post" id="device_control" action="">
     {% csrf_token %}
     <label><span class="action-label">Action:</span>
       <select name="action">
         <option value="" selected="selected">---------</option>
         {% if perms.devices.can_change_device_status %}
         <option value="checkout_selected">Checkout</option>
+        <option value="checkin_selected">Checkin</option>
         {% endif %}
         {% if perms.devices.delete_device %}
         <option value="delete_selected">Delete selected</option>   
@@ -40,24 +41,25 @@
       <th>Select</th>
       <th>Name</th>
       <th>Status</th>
-      <th>Lendee</th>
+      <th>Lent to</th>
       <th>Lender</th>
       <th>Serial number</th>
-      <th></th>
+      <th>Condition</th>
     </thead>
-    {% for device in all_devices %}
     <tbody>
+    {% for device in all_devices %}
       <tr>   
         <td><input type="checkbox" value="{{ device.pk }}" name='device_select' id="select_device{{ device.pk }}"></td>
         <td>{{ device.name }}</td>
         <td>{{ device.get_status_display }}</td>
         <td>{{ device.lendee.get_last_name_first }}</td>
-        <td>{{ device.lender }}</td>
+        {# The Lender is a user, so need to get the last name and first name attributes "manually" #}
+        <td>{{ device.lender.last_name }}, &nbsp;{{ device.lender.first_name }}</td> 
         <td>{{ device.serial_number }}</td>
-        {# <td><a href="{% url 'devices:delete' device.pk %}">Delete</a></td> #}
+        <td>{{ device.get_condition_display }}</td>
       </tr>
-    </tbody>
     {% endfor %}
+    </tbody>
   </table>
 </form>
 {% else %}
@@ -66,7 +68,7 @@
 {% endif %}
 <script>
   // Show confirmation dialog before deleting devices
-  $("#deviceControl").submit(function() {
+  $("#device_control").submit(function() {
     if ($("select[name='action']").val() == "delete_selected") {
         var c = confirm("Are you sure you want to delete the selected devices?");
         return c;

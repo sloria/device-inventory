@@ -34,6 +34,10 @@ class Experimenter(models.Model):
         self.user.save()
         super(Experimenter, self).save()
 
+    
+    def get_last_name_first(self):
+        return "{}, {}".format(self.user.last_name, self.user.first_name)
+
 class Lendee(models.Model):
     '''A lendee. May either be a user or a subject (but not both).
     '''

@@ -20,13 +20,18 @@ urlpatterns = patterns('',
         ),
     
     # ex: /devices/3/delete/
-    url(r'^(?P<pk>\d)/delete/$',
+    url(r'^(?P<pk>\d+)/delete/$',
         DeviceDelete.as_view(),
         name='delete'
         ),
 
     # ex: /devices/3/checkout
-    url(r'^(?P<pk>\d)/checkout/$',
+    url(r'^(?P<pk>\d+)/checkout/$',
         DeviceCheckout.as_view(),
-        name='checkout')
+        name='checkout'),
+
+    # ex: /devices/3/checkin
+    url(r'^(?P<pk>\d+)/checkin/$',
+        DeviceCheckin.as_view(),
+        name='checkin'),
 )

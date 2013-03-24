@@ -8,7 +8,9 @@ from inventory.user.models import Experimenter, Reader, Lendee
 class UserFactory(Factory):
     FACTORY_FOR = User
 
-    username = Sequence(lambda n: "user{0}".format(n))
+    username = Sequence(lambda n: "user{0}@example.com".format(n))
+    first_name = 'Fred'
+    last_name = Sequence(lambda n: 'DouglassThe{0}'.format(n))
     email = Sequence(lambda n: 'user{0}@example.com'.format(n))
     password = 'abc'
     is_active = True
