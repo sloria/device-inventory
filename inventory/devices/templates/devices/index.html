@@ -52,9 +52,21 @@
         <td><input type="checkbox" value="{{ device.pk }}" name='device_select' id="select_device{{ device.pk }}"></td>
         <td>{{ device.name }}</td>
         <td>{{ device.get_status_display }}</td>
-        <td>{{ device.lendee.get_last_name_first }}</td>
+        <td>
+          {% if device.lendee %}
+          {{ device.lendee.get_last_name_first }}
+          {% else %}
+          -----
+          {% endif %}
+        </td>
         {# The Lender is a user, so need to get the last name and first name attributes "manually" #}
-        <td>{{ device.lender.last_name }}, &nbsp;{{ device.lender.first_name }}</td> 
+        <td>
+          {% if device.lender %}
+          {{ device.lender.last_name }}, &nbsp;{{ device.lender.first_name }}
+          {% else %}
+          -----  
+          {% endif %}
+        </td> 
         <td>{{ device.serial_number }}</td>
         <td>{{ device.get_condition_display }}</td>
       </tr>

@@ -15,7 +15,7 @@
 
 <form id="login_form" method="post" action="{% url 'auth_login' %}">{% csrf_token %}
     <dl>
-        <dt><label for="id_username">Username:</label>{% if form.username.errors %} <span class="error">{{ form.username.errors|join:", " }}</span>{% endif %}</dt>
+        <dt><label for="id_username">Email:</label>{% if form.username.errors %} <span class="error">{{ form.username.errors|join:", " }}</span>{% endif %}</dt>
         <dd>{{ form.username }}</dd>
         <dt><label for="id_password">Password:</label>{% if form.password.errors %} <span class="error">{{ form.password.errors|join:", " }}</span>{% endif %}</dt>
         <dd>{{ form.password }}</dd>

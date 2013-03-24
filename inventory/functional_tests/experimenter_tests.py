@@ -138,16 +138,18 @@ class TestAnExperimenter(WebTest):
         res = self.app.get('/', user=self.experimenter.user).follow()
         assert_not_in('Create user', res)
 
-    def test_can_checkin_a_scratched_device(self):
-        # A device is created
-        device = DeviceFactory(status=Device.CHECKED_OUT)
-        # logs in
+    
+    def _checkin(self, device_index, condition="excellent"):
+        '''Helper method for checking in a device. Goes to index, 
+        selects the device, selects "Check in", selects condition, 
+        then submits. Returns the response after submitting the checkin form.
+        '''
         res = self.app.get('/', user=self.experimenter.user).follow()
         # at the index page, there's a device that's checked out
         assert_in('Checked out', res)
         # selects the device
         form = res.forms['device_control']
-        form.set('device_select', True, index=0)
+        form.set('device_select', True, index=device_index)
         # Selects the Check In action
         form['action'] = 'checkin_selected'
         # submits
@@ -158,9 +160,17 @@ class TestAnExperimenter(WebTest):
         # Can select the condition of the device 
         assert_in('Condition: ', res)
         # selects Scratched
-        form['condition'] = 'scratched'
+        form['condition'] = condition
         # submits
         res = form.submit().follow()
+
+    def test_can_checkin_a_scratched_device(self):
+        # A device is created
+        device = DeviceFactory(status=Device.CHECKED_OUT)
+        
+        # user checks in the device
+
+
         # status is updated in database
         device = Device.objects.get(pk=device.pk)
         assert_equal(device.status, Device.CHECKED_IN)
@@ -178,4 +188,7 @@ class TestAnExperimenter(WebTest):
         assert_equal(device.status, Device.BROKEN)
 
     def test_checkout_with_no_lendees(self):
+        assert False, 'finish me'
+
+    def test_can_change_device_condition(self):
         assert False, 'finish me'

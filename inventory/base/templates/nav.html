@@ -15,11 +15,11 @@
 
         {% if user.is_authenticated %}
         <form class="navbar-form pull-right" action="{% url 'auth_logout' %}" method="get">
-          <button type="submit" class="btn">Logout</button>
+          <ul class="nav pull-right">
+          <li><a>Logged in as {{ user.get_full_name }}</a></li>
+          <li><button type="submit" class="btn">Logout</button></li>   
+          </ul>
         </form>
-        <ul class="nav pull-right">
-          <li><a>Logged in as {{ user.username }}</a></li>
-        </ul>
         {% else %}
 
         {% endif %}

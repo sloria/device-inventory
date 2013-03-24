@@ -21,7 +21,6 @@ class Device(models.Model):
     EXCELLENT = 'EX'
     SCRATCHED = 'SC'
 
-
     # Define possible choices for Status field
     STATUS_CHOICES = (
         (CHECKED_IN, 'Checked in'),
