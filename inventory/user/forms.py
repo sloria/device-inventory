@@ -67,8 +67,22 @@ class UserForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_id = 'user_form'
+        self.helper.form_class = 'form-create'
         self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Submit'))
+        self.helper.layout = Layout(
+                Fieldset(
+                        'Create User',
+                        'user_type',
+                        'first_name',
+                        'last_name',
+                        'email',
+                        'password1',
+                        'password2',
+                    ),
+                ButtonHolder(
+                    Submit('submit','Submit')
+                    )
+            )
         super(UserForm, self).__init__(*args, **kwargs)
 
 class SubjectForm(forms.ModelForm):
