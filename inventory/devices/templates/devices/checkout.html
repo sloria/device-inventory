@@ -14,8 +14,9 @@
     </form>
     {% else %}
     <p>
-        No lendees available! 
+        Nobody to lend to.
     </p>
+    <a href="{% url 'users:create_subject' %}">Create new subject</a>
     {% endif %}
 </ul>
 {% endblock content %}

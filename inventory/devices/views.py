@@ -1,7 +1,7 @@
 # Create your views here.
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.generic import View, ListView, CreateView, DeleteView, FormView
 
@@ -33,7 +33,7 @@ class DevicesListView(ListView):
         if action == 'delete_selected': 
             selected_devices.delete() # delete selected from database
             messages.success(request, 
-                    'Successfully deleted {} devices'.format(len(selected_pks)))
+                    'Successfully deleted {n} devices'.format(n=len(selected_pks)))
         elif action in ('checkout_selected', 'checkin_selected'):
             # Make sure user selected one and only one device 
             if len(selected_devices) > 1:
@@ -85,6 +85,7 @@ class DeviceCheckout(View):
     '''
 
     def get(self, request, pk):
+        request.session['last_device_id'] = pk
         if Lendee.objects.exists():
             lendees = Lendee.objects.all()
             return render(request, 'devices/checkout.html', {'lendees': lendees})
@@ -92,16 +93,14 @@ class DeviceCheckout(View):
             return render(request, 'devices/checkout.html', {'lendees': False})
 
     def post(self, request, pk):
-        # Get the device
-        device = Device.objects.get(pk=pk)
         # Get the pk of the selected lendee
         selected_lendee_pk = int(request.POST.get('lendee_select'))
         # Get the ledee object
         lendee = Lendee.objects.get(pk=selected_lendee_pk)
-        # Update the device's lendee and lender attributes
-        device.lendee = lendee
-        device.lender = request.user
-        device.save()
+        # Update the device's lendee, lender, and status
+        Device.objects.filter(pk=pk).update(lendee=lendee,
+                                            lender=request.user,
+                                            status=Device.CHECKED_OUT)
         return redirect('devices:index')
 
 class DeviceCheckin(FormView):

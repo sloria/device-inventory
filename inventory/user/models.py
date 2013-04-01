@@ -6,8 +6,9 @@ from django.contrib.auth.models import User, Permission
 class Subject(models.Model):
     '''A subject.
     '''
-    name = models.CharField(max_length=50, null=True, blank=True)
-    subject_id = models.CharField(max_length=200)
+    first_name = models.CharField(max_length=50, null=True, blank=True)
+    last_name = models.CharField(max_length=50, null=True, blank=True)
+    subject_id = models.CharField(max_length=200, null=False)
 
     def validate_id(self):
         # TODO
@@ -36,7 +37,7 @@ class Experimenter(models.Model):
 
     
     def get_last_name_first(self):
-        return "{}, {}".format(self.user.last_name, self.user.first_name)
+        return "{0}, {1}".format(self.user.last_name, self.user.first_name)
 
 class Lendee(models.Model):
     '''A lendee. May either be a user or a subject (but not both).
@@ -49,7 +50,15 @@ class Lendee(models.Model):
         return unicode(self.user)
 
     def get_last_name_first(self):
-        return "{}, {}".format(self.user.last_name, self.user.first_name)
+        '''Returns as string with the lendee's last name, a comma, then their
+        first name.
+
+        Example: Hooker, John
+        '''
+        if self.user:
+            return "{0}, {1}".format(self.user.last_name, self.user.first_name)
+        else:
+            return "{0}, {1}".format(self.subject.last_name, self.subject.first_name)
 
 class Reader(models.Model):
     '''A reader. Can only view devices (cannot add/delete/change/status).

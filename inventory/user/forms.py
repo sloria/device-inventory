@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
 
-from inventory.user.models import Experimenter, Reader
+from inventory.user.models import Experimenter, Reader, Subject
 
 class UserForm(forms.Form):
     '''Form for creating a new User.
@@ -70,3 +70,14 @@ class UserForm(forms.Form):
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Submit'))
         super(UserForm, self).__init__(*args, **kwargs)
+
+class SubjectForm(forms.ModelForm):
+    class Meta:
+        model = Subject
+
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_id = 'subject_form'
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Submit'))
+        super(SubjectForm, self).__init__(*args, **kwargs)

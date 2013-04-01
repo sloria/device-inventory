@@ -5,14 +5,17 @@
 <h1 class="page-title center">Devices</h1>
 <div class="btn-toolbar">
   {% if user.is_authenticated %}
+  {% if user.is_superuser %}
+  <h2>Admin actions</h2>    
+  {% endif %}
   {% if perms.devices.add_device %}
-  <a href="{% url 'devices:add' %}" class="btn">
-    <i class="icon-plus"></i>
+  <a href="{% url 'devices:add' %}" class="btn btn-primary">
+    <i class="icon-plus icon-white"></i>
     Add device    
   </a>
   {% endif %}
   {% if perms.user.add_user %}
-  <a href="{% url 'users:add' %}" class="btn">
+  <a href="{% url 'users:create_user' %}" class="btn">
     <i class="icon-plus"></i>
     Create user    
   </a>    
@@ -21,7 +24,7 @@
   {% if all_devices.count %}  
   <form method="post" id="device_control" action="">
     {% csrf_token %}
-    <label><span class="action-label">Action:</span>
+    <label><span class="action-label">Device Action:</span></label>
       <select name="action">
         <option value="" selected="selected">---------</option>
         {% if perms.devices.can_change_device_status %}

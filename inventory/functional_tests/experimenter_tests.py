@@ -6,7 +6,7 @@ from inventory.user.tests.factories import (UserFactory, ExperimenterFactory,
                                              LendeeFactory)
 from inventory.devices.tests.factories import DeviceFactory
 from inventory.devices.models import Device
-from inventory.user.models import Experimenter
+from inventory.user.models import Subject, Lendee
 
 class TestAnExperimenter(WebTest):
     def setUp(self):
@@ -81,13 +81,13 @@ class TestAnExperimenter(WebTest):
         assert_in(lendee.get_last_name_first(), res)
         form = res.forms['lendee_select_form']
         # Selects the radio button for one of the lendees
-        form['lendee_select'] = '1' # selects lendee with pk 1
+        form['lendee_select'] = str(lendee.pk) # pk is the same as the form field value
         # Submits
         res = form.submit().follow()
         return res
 
 
-    def test_can_checkout_device(self):
+    def test_can_checkout_device_to_user(self):
         # two devices are already created
         DeviceFactory(serial_number='123')
         DeviceFactory(serial_number='456')
@@ -108,13 +108,12 @@ class TestAnExperimenter(WebTest):
         assert_in('Lendee, Lois', res)
         assert_equal(device.lendee, lendee1)
         assert_equal(device.lender, self.experimenter.user)
+        assert_equal(device.status, Device.CHECKED_OUT)
         # Can see the lendee's name
         assert_in("Experimenter, &nbsp;Ellen", res)
 
         # Now check out the other device
         res = self._checkout(1, lendee2)
-
-
 
     def test_cannot_checkout_multiple_devices(self):
         # two devices created
@@ -155,7 +154,7 @@ class TestAnExperimenter(WebTest):
         # submits
         res = form.submit().follow()
         # taken to a page with a form for checking in
-        assert_equal(res.request.path, '/devices/{0}/checkin/'.format(device.pk))
+        assert_in('checkin', res.request.path)
         form = res.forms['checkin_form']
         # Can select the condition of the device 
         assert_in('Condition: ', res)
@@ -163,13 +162,14 @@ class TestAnExperimenter(WebTest):
         form['condition'] = condition
         # submits
         res = form.submit().follow()
+        return res
 
     def test_can_checkin_a_scratched_device(self):
         # A device is created
         device = DeviceFactory(status=Device.CHECKED_OUT)
         
         # user checks in the device
-
+        res = self._checkin(0, 'scratched')
 
         # status is updated in database
         device = Device.objects.get(pk=device.pk)
@@ -183,12 +183,59 @@ class TestAnExperimenter(WebTest):
         assert_in('Successfully checked in', res)
 
     def test_can_checkin_a_broken_device(self):
-        assert False, 'finish me'
-        assert_equal(device.status, Device.BROKEN)
-        assert_equal(device.status, Device.BROKEN)
+        # device is created
+        device = DeviceFactory(status=Device.CHECKED_OUT)
 
-    def test_checkout_with_no_lendees(self):
-        assert False, 'finish me'
+        # user checks in the device and changes condition to broken
+        res = self._checkin(0, 'broken')
+        # status is updated in database
+        device = Device.objects.get(pk=device.pk)
+        assert_equal(device.status, Device.BROKEN)
+        # The lendee's name should not be visible because the device is checked in
+        assert_not_in(self.experimenter.get_last_name_first(), res)
+        # Sees success message
+        assert_in('Successfully checked in', res)
+
+    def test_checkout_with_no_lendees_and_creating_subject(self):
+        # device is created 
+        # note: there are no lendees
+        device = DeviceFactory(status=Device.CHECKED_IN)
+        # goes to homepage
+        res = self.app.get('/', user=self.experimenter.user).follow()
+        form = res.forms['device_control']
+        # selects the device checkbox and chooses checkout
+        form.set('device_select', True, 0) # select first (0-th) device
+        form['action'] = 'checkout_selected'
+        # submits
+        res = form.submit().follow()
+        # on the new page, there is text saying that there 
+        # are no lendees
+        assert_in('Nobody to lend to', res)
+        # but there is a link to create a new lendee; clicks it
+        res = res.click('Create new subject')
+        # taken to a subject form
+        form = res.forms['subject_form']
+        # fills out the form
+        form['first_name'] = 'Sally'
+        form['last_name'] = 'Subject'
+        form['subject_id'] = '1234ABC'
+        # submits
+        res = form.submit().follow()
+        # Subject is saved to db. A new Lendee is also created
+        assert_equal(Subject.objects.all().count(), 1)
+        assert_equal(Lendee.objects.all().count(), 1)
+        # taken back to checkout page
+        assert_equal('/devices/{0}/checkout/'.format(device.pk), res.request.path)
+        # Can now check out to the new subject
+        res = self._checkout(0, Lendee.objects.all()[0]) # Checks out to the one and only Lendee
+        # back to the index page
+        assert_equal('/devices/', res.request.path)
+        # change is saved to the db
+        device = Device.objects.get(pk=device.pk) # Need to query device to get 
+                                                    # The update attributes
+        assert_equal(device.status, Device.CHECKED_OUT)
+        assert_equal(device.lendee, Lendee.objects.all()[0])
+        assert False, 'finish me (subject_id validation)'
 
     def test_can_change_device_condition(self):
         assert False, 'finish me'
