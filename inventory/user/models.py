@@ -28,10 +28,13 @@ class Experimenter(models.Model):
     def save(self, *args, **kwargs):
         '''Add permission to change device status 
         before saving.'''
-        change_status_permission = Permission.objects.get(
-                                            codename='can_change_device_status'
+        change_status_perm = Permission.objects.get(
+                                        codename='can_change_device_status'
                                     )
-        self.user.user_permissions.add(change_status_permission)
+        change_attributes_perm = Permission.objects.get(
+                                        codename='can_update_device_attributes'
+                                    )
+        self.user.user_permissions.add(change_status_perm, change_attributes_perm)
         self.user.save()
         super(Experimenter, self).save()
 

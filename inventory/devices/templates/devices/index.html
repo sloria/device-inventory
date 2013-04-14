@@ -28,11 +28,14 @@
       <select name="action">
         <option value="" selected="selected">---------</option>
         {% if perms.devices.can_change_device_status %}
-        <option value="checkout_selected">Checkout</option>
-        <option value="checkin_selected">Checkin</option>
+        <option value="checkout_selected">Check OUT</option>
+        <option value="checkin_selected">Check IN</option>
+        {% endif %}
+        {% if perms.devices.can_update_device_attributes %}
+        <option value="update_selected">EDIT selected</option>          
         {% endif %}
         {% if perms.devices.delete_device %}
-        <option value="delete_selected">Delete selected</option>   
+        <option value="delete_selected">DELETE selected</option>   
         {% endif %}
       </select>
 

@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.views.generic import View, ListView, CreateView, DeleteView, FormView
+from django.views.generic import View, ListView, CreateView, DeleteView, UpdateView, FormView
 
 from inventory.devices.models import Device, Lendee
 from inventory.devices.forms import DeviceForm, CheckinForm
@@ -30,11 +30,14 @@ class DevicesListView(ListView):
         # Get the selected Device objects
         selected_devices = Device.objects.filter(pk__in=selected_pks)
 
+        # Handle actions that take more than one device 
         if action == 'delete_selected': 
             selected_devices.delete() # delete selected from database
             messages.success(request, 
                     'Successfully deleted {n} devices'.format(n=len(selected_pks)))
-        elif action in ('checkout_selected', 'checkin_selected'):
+        
+        # Handle actions that take one and only one device
+        elif action in ('checkout_selected', 'checkin_selected', 'update_selected'):
             # Make sure user selected one and only one device 
             if len(selected_devices) > 1:
                 message = ''
@@ -52,6 +55,8 @@ class DevicesListView(ListView):
                     return redirect('devices:checkout',pk=device.pk)
                 elif action == 'checkin_selected':
                     return redirect('devices:checkin', pk=device.pk)
+                elif action == 'update_selected':
+                    return redirect('devices:update', pk=device.pk)
         return redirect('devices:index')
 
 class DeviceAdd(CreateView):
@@ -131,4 +136,8 @@ class DeviceCheckin(FormView):
         messages.success(self.request, 'Successfully checked in')
         # Change device condition
         return super(DeviceCheckin, self).form_valid(form)
+
+class DeviceUpdate(UpdateView):
+    model = Device
+
 

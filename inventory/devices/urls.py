@@ -34,4 +34,8 @@ urlpatterns = patterns('',
     url(r'^(?P<pk>\d+)/checkin/$',
         DeviceCheckin.as_view(),
         name='checkin'),
+
+    url(r'^(?P<pk>\d+)/edit/$',
+        DeviceUpdate.as_view(),
+        name='update')
 )

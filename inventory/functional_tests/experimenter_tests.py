@@ -237,5 +237,33 @@ class TestAnExperimenter(WebTest):
         assert_equal(device.lendee, Lendee.objects.all()[0])
         assert False, 'finish me (subject_id validation)'
 
-    def test_can_change_device_condition(self):
+    
+    def test_can_edit_only_one_device_at_a_time(self):
         assert False, 'finish me'
+
+    def test_can_change_device_condition_to_broken(self):
+        # a device is created, condition is currently Excellent
+        device = DeviceFactory(condition=Device.EXCELLENT)
+        # goes to home page
+        res = self.app.get('/', user=self.experimenter.user).follow()
+        # selects the device
+        form = res.forms['device_control']
+        form.set('device_select', True, 0)  # select first device
+        # selects the edit action
+        form['action'] = 'update_selected'
+        # submits
+        res = form.submit().follow()
+        # taken to the device edit page
+        assert_equal('/devices/{0}/edit/'.format(device.pk), res.request.path)
+        # changes the Condition to broken (radio button)
+        form = res.forms['device_edit_form']
+        # submits
+        res = form.submit().follow()
+        # back at the index page
+        assert_equal('/devices/', res.request.path)
+        # change was saved to db
+        # both the status AND the condition are changed
+        device = Device.objects.get(pk=device.pk)
+        assert_equal(device.status, Device.BROKEN)
+        assert_equal(device.condition, Device.BROKEN)
+        assert False, 'check me'

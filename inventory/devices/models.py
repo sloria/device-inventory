@@ -60,4 +60,5 @@ class Device(models.Model):
     class Meta:
         permissions = (
             ('can_change_device_status', "Can change device status"),
+            ('can_update_device_attributes', "Can update device attributes")
         )
