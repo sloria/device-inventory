@@ -243,8 +243,6 @@ def test(unit=1, integration=1, functional=1, selenium=0, all=0):
             command += " --exclude='integration_tests' "
         if int(functional) == 0:
             command += " --exclude='functional_tests' "
-        if int(selenium) == 1:
-            command = './manage.py test -v 2 --settings=inventory.settings.test_settings inventory/functional_tests/selenium_tests.py'
-        else:
-            command += " --exclude='selenium_tests' "
+        if int(selenium) == 0:
+            command += ' --exclude="selenium_tests" '
     local(command)

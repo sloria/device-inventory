@@ -64,7 +64,7 @@ class TestAnExperimenter(WebTest):
         assert False, 'finish me'
 
     
-    def _checkout(self, device_index, lendee):
+    def _checkout(self, device_index=0, lendee=None):
         '''Helper method for going to the device index, selecting a device,
         clicking checkout, then filling out and submitting the lendee form.'''
         # goes to devices page
