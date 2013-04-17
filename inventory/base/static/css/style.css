@@ -15,5 +15,8 @@
 
 @import url('bootstrap.css');
 @import url('bootstrap-responsive.css');
+@import url('../libs/fontawesome/css/font-awesome.min.css');
+@import url('../libs/datatables/media/css/jquery.dataTables.css');
+@import url('../libs/datatables/media/css/dataTables.bootstrap.css');
 @import url('app.css');
 

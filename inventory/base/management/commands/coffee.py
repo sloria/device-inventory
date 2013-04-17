@@ -18,8 +18,8 @@ class Command(BaseCommand):
         if len(args) != 1:
             raise CommandError('Please provide one app name')
         app_name = args[0]
-        target_path = 'sqk/%s/static/js' % (app_name)
-        src_path = 'sqk/%s/static/coffee/*.coffee' % (app_name)
+        target_path = 'inventory/%s/static/js' % (app_name)
+        src_path = 'inventory/%s/static/coffee/*.coffee' % (app_name)
         if options['watch']:
             print "Watching .coffee files in %s and compiling them to %s" % (app_name + '/static/coffee', src_path)
             command = "coffee -o %s -cw %s" % (target_path, src_path)

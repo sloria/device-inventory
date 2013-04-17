@@ -21,7 +21,6 @@ class SeleniumTestCase(LiveServerTestCase):
         self.driver.get("{root}{url}".format(
                         root=self.live_server_url, url=url))
 
-
 class CustomWebDriver(web_driver_module.WebDriver):
     """Custom WebDriver with some helpers added.
     """
@@ -38,12 +37,24 @@ class CustomWebDriver(web_driver_module.WebDriver):
             raise NoSuchElementException(css_selector)
         return elems
 
+    def wait_for_css(self, css_selector, timeout=7):
+        """Shortcut for WebDriverWait
+        """
+        try:
+            return WebDriverWait(self, timeout).\
+                    until(lambda driver: driver.find_css(css_selector))
+        except:
+            self.quit()
 
-    # def wait_for_css(self, css_selector, timeout=7):
-    #     """Shortcut for WebDriverWait
-    #     """
-    #     try:
-    #         return WebDriverWait(self, timeout).\
-    #                 until(lambda driver: driver.find_css(css_selector))
-    #     except:
-    #         self.quit()
+    def body_text(self):
+        '''Shortcut for accessing the text within the <body> of the DOM.
+        
+        Example:
+        >> assert_in('Some text', self.driver.body_text())
+        '''
+        return self.find_element_by_tag_name('body').text
+
+    def click_submit(self):
+        '''Shortcut for clicking the submit button on a webpage.
+        '''
+        return self.find_css("input[type='submit']").click()

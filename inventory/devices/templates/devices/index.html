@@ -9,42 +9,25 @@
   <h2>Admin actions</h2>    
   {% endif %}
   {% if perms.devices.add_device %}
-  <a href="{% url 'devices:add' %}" class="btn btn-primary">
+  <a href="{% url 'devices:add' %}" class="btn">
     <i class="icon-plus icon-white"></i>
     Add device    
   </a>
   {% endif %}
   {% if perms.user.add_user %}
   <a href="{% url 'users:create_user' %}" class="btn">
-    <i class="icon-plus"></i>
+    <i class="icon-user"></i>
     Create user    
-  </a>    
+  </a>  
+  <hr> 
   {% endif %}
+
+  <h2>Device actions</h2>
   
   {% if all_devices.count %}  
-  <form method="post" id="device_control" action="">
-    {% csrf_token %}
-    <label><span class="action-label">Device Action:</span></label>
-      <select name="action">
-        <option value="" selected="selected">---------</option>
-        {% if perms.devices.can_change_device_status %}
-        <option value="checkout_selected">Check OUT</option>
-        <option value="checkin_selected">Check IN</option>
-        {% endif %}
-        {% if perms.devices.can_update_device_attributes %}
-        <option value="update_selected">EDIT selected</option>          
-        {% endif %}
-        {% if perms.devices.delete_device %}
-        <option value="delete_selected">DELETE selected</option>   
-        {% endif %}
-      </select>
-
-    </label>
-    <input type="submit" name="_save" class="default btn" value="Go"/>
-  </div><!-- end btn-toolbar -->
-  <table class='table table-striped'>
+  <table id="id_devices_table" class='table table-striped'>
     <thead>
-      <th>Select</th>
+      {# <th>Select</th> #}
       <th>Name</th>
       <th>Status</th>
       <th>Lent to</th>
@@ -54,8 +37,8 @@
     </thead>
     <tbody>
     {% for device in all_devices %}
-      <tr>   
-        <td><input type="checkbox" value="{{ device.pk }}" name='device_select' id="select_device{{ device.pk }}"></td>
+      <tr data-id="{{ device.pk }}">   
+        {# <td><input type="checkbox" value="{{ device.pk }}" name='device_select' id="select_device{{ device.pk }}"></td> #}
         <td>{{ device.name }}</td>
         <td>{{ device.get_status_display }}</td>
         <td>
@@ -79,11 +62,13 @@
     {% endfor %}
     </tbody>
   </table>
-</form>
 {% else %}
 <h2>No devices</h2>
 {% endif %}
 {% endif %}
+{% endblock content %}
+
+{% block scripts %}
 <script>
   // Show confirmation dialog before deleting devices
   $("#device_control").submit(function() {
@@ -93,4 +78,6 @@
     }
 });
 </script>
-{% endblock content %}
+{# Datatables initialization #}
+<script src="{{ STATIC_URL }}/js/datatables_init.js"></script>
+{% endblock scripts %}

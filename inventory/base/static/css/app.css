@@ -52,6 +52,34 @@ textarea {
   padding: 7px 9px;
 }
 
+/* table */
+
+.table tbody tr.selected td,
+.table tbody tr.selected th {
+  background-color: #ffff66;
+  color: black;
+}
+
+.table tbody tr.selected:hover td,
+.table tbody tr.selected:hover th {
+  background-color: #ffff66 !important;
+  color: black;
+}
+
+.table-striped tbody tr.selected:nth-child(odd) td,
+.table-striped tbody tr.selected:nth-child(odd) th {
+  background-color: #ffff66;
+  color: black;
+}
+
+/* Datatables + bootstrap */
+div.DTTT .btn {
+  font-size: 12px;
+}
+
+div.DTTT .btn:hover {
+  text-decoration: none !important;
+}
 
 /* footer */
 
