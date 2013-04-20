@@ -18,7 +18,13 @@
   <a href="{% url 'users:create_user' %}" class="btn">
     <i class="icon-user"></i>
     Create user    
-  </a>  
+  </a>
+  {% if perms.devices.remove_device %}
+    <a href="{% url 'users:create_user' %}" class="btn btn-danger">
+    <i class="icon-trash"></i>
+    Delete device
+  </a>      
+    {% endif %}  
   <hr> 
   {% endif %}
 

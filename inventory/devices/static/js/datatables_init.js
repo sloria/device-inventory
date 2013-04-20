@@ -15,11 +15,16 @@
             'sButtonText': '<i class="icon-signout"></i> Check OUT',
             'fnClick': function(nButton, oConfig, oFlash) {
               var ret;
-              ret = prompt("Enter the lendee's name or subject ID: ", "");
-              if (ret) {
-                return checkout_selected(ret);
+              if (oTT.fnGetSelected(oTable).length === 0) {
+                return alert('Please select a device');
+              } else {
+                ret = prompt("Check OUT - Enter a subject ID or user's e-mail address: ", "");
+                if (ret) {
+                  return checkout_selected(ret);
+                }
               }
-            }
+            },
+            'sucess': 'sucess'
           }, {
             'sExtends': 'text',
             'sButtonClass': 'btn btn-large btn-warning btn-checkin',
@@ -43,10 +48,25 @@
     return window.oTT = TableTools.fnGetInstance('id_devices_table');
   });
 
-  checkout_selected = function(subject_id) {
-    var selected;
+  checkout_selected = function(lendee) {
+    var pk, selected;
     selected = oTT.fnGetSelected(oTable);
-    return console.log(get_selected_id(selected));
+    pk = get_selected_id(selected);
+    return $.ajax({
+      url: "/devices/" + pk + "/checkout/",
+      type: 'POST',
+      data: {
+        "lendee": lendee
+      },
+      success: function(data) {
+        var confirmed;
+        if (data.error) {
+          return alert(data.error);
+        } else {
+          return confirmed = confirm("Confirm check out to " + data.full_name + "?");
+        }
+      }
+    });
   };
 
   get_selected_id = function(selected) {

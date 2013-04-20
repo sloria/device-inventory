@@ -50,20 +50,8 @@ class TestAReader(WebTest):
         DeviceFactory()
         # goes to devices page
         res = self.app.get('/', user=self.reader.user).follow()
-        # cannot select 'Delete device' (raises ValuError)
-        form = res.forms['device_control']
-        with assert_raises(ValueError):
-            form['action'] = 'delete_selected'
-
-    def test_cannot_checkout_device(self):
-        # a device is created
-        DeviceFactory()
-        # goes to devices page
-        res = self.app.get('/', user=self.reader.user).follow()
-        # cannot select 'Delete device' (raises ValuError)
-        form = res.forms['device_control']
-        with assert_raises(ValueError):
-            form['action'] = 'checkout_selected'
+        # there's no delete button
+        assert_not_in('Delete', res)
 
     def test_cannot_create_users(self):
         # logs in 

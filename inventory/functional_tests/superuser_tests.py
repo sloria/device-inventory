@@ -52,39 +52,8 @@ class TestASuperUser(WebTest):
         res.mustcontain('Name', 'Status', 'Lender', 'Lent to', 'Serial number')
         res.mustcontain('iPad 4, 16GB, WiFi', 'Storage', '12345X67')
 
-    def test_can_checkout_device(self):
-        # two devices are already created
-        DeviceFactory(serial_number='123')
-        DeviceFactory()
 
-        user_lendee = UserFactory(username="lendee1", first_name='Lois', last_name='Lendee')
-        lendee1 = LendeeFactory(user=user_lendee)
-        assert_equal(Device.objects.all().count(), 2)
-        # goes to devices page
-        res = self.app.get('/', user=self.admin).follow()
-        # checks the first device
-        form = res.forms['device_control']
-        form.set('device_select', True, index=0)
-        # Selects Checkout device
-        form.set('action', 'checkout_selected')
-        # Submits
-        res = form.submit().follow()
-        # taken to a page with a list of lendees
-        assert_in('Select Lendee', res)
-        assert_in('Lendee, Lois', res)
-        form = res.forms['lendee_select_form']
-        # Selects the radio button for one of the lendees
-        form['lendee_select'] = '1' # selects lendee with pk 1
-        # Submits
-        res = form.submit().follow()
-        # Redirected to the devices page
-        # The Lendee and Lender have been updated on the page and in the DB
-        assert_in('Lendee, Lois', res)
-        assert_in("Admin, &nbsp;Alan", res)
-        device = Device.objects.get(serial_number='123')
-        assert_equal(device.lendee, lendee1)
-
-    def test_can_remove_devices(self):
+    def test_can_see_delete_btn(self):
         # 3 devices are created
         device1, device2, device3 = DeviceFactory(), DeviceFactory(), DeviceFactory()
         assert_equal(Device.objects.all().count(), 3)
@@ -93,21 +62,9 @@ class TestASuperUser(WebTest):
         # devices are listed
         assert_in(device1.serial_number, res)
         assert_in(device2.serial_number, res)
+        # there is a delete button
+        assert_in('Delete', res)
         # selects first two devices
-        form = res.forms['device_control']
-        form.set('device_select', True, index=0)
-        form.set('device_select', True, index=1)
-        # selects delete action
-        form.set('action', 'delete_selected')
-        # submits
-        res = form.submit().follow()
-        # devices no longer appear
-        assert_not_in(device1.serial_number, res)
-        assert_not_in(device2.serial_number, res)
-        # a success alert appears
-        assert_in('Successfully deleted 2 devices', res)
-        # devices were deleted from database
-        assert_equal(Device.objects.all().count(), 1)
 
     def test_can_create_experimenter(self):
         # logs in 

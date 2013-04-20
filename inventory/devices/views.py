@@ -1,12 +1,17 @@
 # Create your views here.
 from django.core.urlresolvers import reverse_lazy
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.contrib.auth.models import User
+from django.utils import simplejson as json
 from django.views.generic import View, ListView, CreateView, DeleteView, UpdateView, FormView
+import verhoeff
 
 from inventory.devices.models import Device, Lendee
 from inventory.devices.forms import DeviceForm, CheckinForm
+
 
 class DevicesListView(ListView):
     '''Index view for devices.'''
@@ -88,7 +93,7 @@ class DeviceCheckout(View):
     '''View for checking out a device.
     Passes a list of possible lendees to the template for selection.
     '''
-
+    # TODO
     def get(self, request, pk):
         request.session['last_device_id'] = pk
         if Lendee.objects.exists():
@@ -97,15 +102,38 @@ class DeviceCheckout(View):
         else:
             return render(request, 'devices/checkout.html', {'lendees': False})
 
+    # TODO
     def post(self, request, pk):
-        # Get the pk of the selected lendee
-        selected_lendee_pk = int(request.POST.get('lendee_select'))
-        # Get the ledee object
-        lendee = Lendee.objects.get(pk=selected_lendee_pk)
-        # Update the device's lendee, lender, and status
-        Device.objects.filter(pk=pk).update(lendee=lendee,
-                                            lender=request.user,
-                                            status=Device.CHECKED_OUT)
+        '''Checks out a device to either a user or a subject.
+        '''
+        # get the lendee id (a string that's either a subject ID or
+        # an user's name (or maybe email address?)
+        lendee = request.POST['lendee']
+        data = {}
+        try:
+            # if it's a valid subject id
+            if verhoeff.validate(int(lendee)):
+                pass
+                # redirect to subject creation page
+                # get or create the subject
+                # get or create the lendee with the subject as the lendee
+        # else it's a user
+        except ValueError:
+            print 'caught it'
+            try:
+                # get or create the lendee with the user as the user
+                user = User.objects.get(username=lendee)
+                data['full_name'] = user.get_full_name()
+                Lendee.objects.get_or_create(user=user)
+            except ObjectDoesNotExist:
+                data['error'] = 'No user found with e-mail address {email}'.format(email=lendee)
+            json_data = json.dumps(data)
+            return HttpResponse(json_data, mimetype='application/json')
+
+        # # Update the device's lendee, lender, and status
+        # Device.objects.filter(pk=pk).update(lendee=lendee,
+        #                                     lender=request.user,
+        #                                     status=Device.CHECKED_OUT)
         return redirect('devices:index')
 
 class DeviceCheckin(FormView):

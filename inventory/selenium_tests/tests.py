@@ -1,6 +1,5 @@
 '''Functional tests using Selenium'''
 from nose.tools import *
-import time
 from inventory.user.tests.factories import ExperimenterFactory
 from inventory.devices.tests.factories import DeviceFactory
 
@@ -26,7 +25,7 @@ class TestAnExperimenter(SeleniumTestCase):
         self.driver.find_css('#id_password').send_keys('abc')
         self.driver.click_submit()
 
-    def test_can_checkout_device(self):
+    def test_can_checkout_device_to_self(self):
         # at the device index page
         assert_in('Devices', self.driver.body_text())
         assert_not_in('12345', self.driver.body_text())
@@ -36,10 +35,19 @@ class TestAnExperimenter(SeleniumTestCase):
         self.driver.find_css('.btn-checkout').click()
         # a javascript input dialog pops up
         dialog = self.driver.switch_to_alert()
-        print dialog.text
-        # types in subject id
-        dialog.send_keys('12345')
+        assert_in(u'Check OUT - Enter a subject ID or user\'s e-mail address',
+                dialog.text)
+        # types in user's email address
+        dialog.send_keys(self.experimenter.user.username)
         # click accept
         dialog.accept()
-        assert_in('12345', self.driver.body_text())
+        # a dialog appears
+        dialog = self.driver.switch_to_alert()
+        # it shows the lendee's name
+        assert_in('Confirm check out to {name}?'.\
+                format(name=self.experimenter.user.get_full_name()),
+                dialog.text)
+        assert False, 'finish me'
+
+    def test_can_checkout_device_to_subject(self):
         assert False, 'finish me'

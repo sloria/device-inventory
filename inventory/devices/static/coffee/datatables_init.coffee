@@ -13,9 +13,13 @@ initialize_table = () ->
                     'sButtonClass': 'btn btn-large btn-primary btn-checkout',
                     'sButtonText': '<i class="icon-signout"></i> Check OUT'
                     'fnClick': (nButton, oConfig, oFlash) ->
-                        ret = prompt("Enter the lendee's name or subject ID: ", "")
-                        if (ret)
-                            checkout_selected(ret)
+                        if oTT.fnGetSelected(oTable).length == 0
+                            alert('Please select a device')
+                        else
+                            ret = prompt("Check OUT - Enter a subject ID or user's e-mail address: ", "")
+                            if (ret)
+                                checkout_selected(ret)
+                    'sucess'
 
                 },
                 # Check in
@@ -47,9 +51,21 @@ $( () ->
     window.oTT = TableTools.fnGetInstance('id_devices_table')
 )
 
-checkout_selected = (subject_id) ->
+checkout_selected = (lendee) ->
     selected = oTT.fnGetSelected(oTable)
-    console.log get_selected_id(selected)
+    pk = get_selected_id(selected)
+    $.ajax(
+        url: "/devices/#{pk}/checkout/"
+        type: 'POST',
+        data: {
+            "lendee": lendee,
+        },
+        success: (data) -> 
+            if data.error
+                alert(data.error)
+            else
+                confirmed = confirm("Confirm check out to #{data.full_name}?")
+    )
 
 get_selected_id = (selected) ->
     ###
