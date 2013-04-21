@@ -30,6 +30,11 @@ urlpatterns = patterns('',
         DeviceCheckout.as_view(),
         name='checkout'),
 
+    # ex: /devices/3/checkout/confirm
+    url(r'^(?P<pk>\d+)/checkout/confirm$',
+        DeviceCheckoutConfirm.as_view(),
+        name='checkout_confirm'),
+
     # ex: /devices/3/checkin
     url(r'^(?P<pk>\d+)/checkin/$',
         DeviceCheckin.as_view(),

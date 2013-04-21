@@ -81,18 +81,18 @@ class Migration(SchemaMigration):
         u'devices.device': {
             'Meta': {'object_name': 'Device'},
             'condition': ('django.db.models.fields.CharField', [], {'default': "'EX'", 'max_length': '2'}),
-            'created_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 3, 24, 0, 0)'}),
+            'created_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 20, 0, 0)'}),
             'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lendee': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['user.Lendee']", 'null': 'True', 'blank': 'True'}),
             'lender': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'}),
             'make': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'purchased_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 3, 24, 0, 0)'}),
+            'purchased_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 20, 0, 0)'}),
             'responsible_party': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'serial_number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200'}),
             'status': ('django.db.models.fields.CharField', [], {'default': "'ST'", 'max_length': '2'}),
-            'updated_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 3, 24, 0, 0)'})
+            'updated_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 20, 0, 0)'})
         },
         u'user.lendee': {
             'Meta': {'object_name': 'Lendee'},
@@ -102,8 +102,9 @@ class Migration(SchemaMigration):
         },
         u'user.subject': {
             'Meta': {'object_name': 'Subject'},
+            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
+            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             'subject_id': ('django.db.models.fields.CharField', [], {'max_length': '200'})
         }
     }

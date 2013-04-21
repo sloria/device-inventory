@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User, Permission
+from django.contrib.contenttypes.models import ContentType
 
 class Subject(models.Model):
     '''A subject.
@@ -28,11 +29,16 @@ class Experimenter(models.Model):
     def save(self, *args, **kwargs):
         '''Add permission to change device status 
         before saving.'''
-        change_status_perm = Permission.objects.get(
-                                        codename='can_change_device_status'
+        content_type = ContentType.objects.get_for_model(Experimenter)
+        change_status_perm, created = Permission.objects.get_or_create(
+                                        name='Can change device status',
+                                        codename='can_change_device_status',
+                                        content_type=content_type
                                     )
-        change_attributes_perm = Permission.objects.get(
-                                        codename='can_update_device_attributes'
+        change_attributes_perm, created = Permission.objects.get_or_create(
+                                        name='Can update device',
+                                        codename='can_update_device_attributes',
+                                        content_type=content_type
                                     )
         self.user.user_permissions.add(change_status_perm, change_attributes_perm)
         self.user.save()

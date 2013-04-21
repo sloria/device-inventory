@@ -27,6 +27,15 @@ initialize_table = () ->
                     'sExtends': 'text',
                     'sButtonClass': 'btn btn-large btn-warning btn-checkin',
                     'sButtonText': '<i class="icon-signin"></i> Check IN'
+                    "fnClick": (nButton, oConfig, oFlash) -> 
+                        selected = oTT.fnGetSelected(oTable)
+                        pk = get_selected_id(selected)
+                        if oTT.fnGetSelected(oTable).length == 0
+                            alert('Please select a device')
+                        else if get_td("Status", parseInt(pk)) == "Checked in"
+                            alert("Device is already checked in")
+                        else
+                            checkin_selected()
 
                 },
                 # Edit
@@ -64,8 +73,58 @@ checkout_selected = (lendee) ->
             if data.error
                 alert(data.error)
             else
+                # Show confirmation dialog
                 confirmed = confirm("Confirm check out to #{data.full_name}?")
+                if confirmed
+                    $.ajax(
+                        url: "/devices/#{pk}/checkout/confirm",
+                        type: 'POST',
+                        data: {
+                            'lendee': lendee
+                        },
+                        success: (data) ->
+                            # Refresh the page
+                            window.location = "/devices"       
+                    )
     )
+
+checkin_selected = () ->
+    selected = oTT.fnGetSelected(oTable)
+    pk = get_selected_id(selected)
+    window.location = "/devices/#{pk}/checkin"
+
+delete_selected = () ->
+    ###
+    Redirects user to the delete page for the selected device.
+    ###
+    selected = oTT.fnGetSelected(oTable)
+    pk = get_selected_id(selected)
+    window.location = "/devices/#{pk}/delete"
+
+# Add click handler for delete button
+$('#id_delete_btn').click((e) -> delete_selected() )
+
+change_td = (column_name, pk, new_text) ->
+    ###
+    Changes the text of the cell at the column that contains
+    text column_name and the row of the device with a given pk.
+    ###
+    col_idx = $("th:contains('#{column_name}')").index()
+    $("tr[data-id='#{pk}']")
+                .find('td')
+                .eq(col_idx)
+                .html(new_text)
+
+window.get_td = (column_name, pk) ->
+    ###
+    Get the text of a table cell at the column that contains the
+    text column_name and the row of the device with a given pk.
+    ###
+    col_idx = $("th:contains('#{column_name}')").index()
+    $("tr[data-id='#{pk}']")
+                .find('td')
+                .eq(col_idx)
+                .text()
 
 get_selected_id = (selected) ->
     ###
