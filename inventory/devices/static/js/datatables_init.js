@@ -3,6 +3,9 @@
   var change_td, checkin_selected, checkout_selected, get_selected_id, get_selected_ids, get_td, initialize_table;
 
   initialize_table = function() {
+    /*
+        Initialize jQuery Datatables
+    */
     return $('#id_devices_table').dataTable({
       "sDom": "<'row-fluid'<'span6'T><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
       "oTableTools": {
@@ -32,7 +35,7 @@
               var pk, selected;
               selected = oTT.fnGetSelected(oTable);
               pk = get_selected_id(selected);
-              if (oTT.fnGetSelected(oTable).length === 0) {
+              if (selected < 1) {
                 return alert('Please select a device');
               } else if (get_td("Status", parseInt(pk)) === "Checked in") {
                 return alert("Device is already checked in");
@@ -42,8 +45,18 @@
             }
           }, {
             'sExtends': 'text',
-            'sButtonClass': 'btn btn-large btn-info btn-edit',
-            'sButtonText': '<i class="icon-pencil"></i> Edit device'
+            'sButtonClass': 'btn btn-large btn-info btn-edit-device',
+            'sButtonText': '<i class="icon-pencil"></i> Edit device',
+            'fnClick': function(nButton, oConfig, oFlash) {
+              var pk, selected;
+              selected = oTT.fnGetSelected(oTable);
+              if (selected.length < 1) {
+                return alert("Please select a device.");
+              } else {
+                pk = get_selected_id(selected);
+                return window.location = "/devices/" + pk + "/edit/";
+              }
+            }
           }, {
             'sExtends': 'csv',
             'sButtonClass': 'btn btn-large btn-default btn-export',
@@ -99,8 +112,9 @@
     return window.location = "/devices/" + pk + "/checkin";
   };
 
-  $("#id_delete_btn").click(function() {
+  $("#id_delete_btn").click(function(e) {
     var confirmed, pk, selected;
+    e.preventDefault();
     selected = oTT.fnGetSelected(oTable);
     if (selected.length < 1) {
       return alert("No device selected.");

@@ -1,6 +1,7 @@
-
-
 initialize_table = () ->
+    ###
+    Initialize jQuery Datatables
+    ###
     $('#id_devices_table').dataTable({
         "sDom": "<'row-fluid'<'span6'T><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
         "oTableTools": {
@@ -29,7 +30,7 @@ initialize_table = () ->
                     "fnClick": (nButton, oConfig, oFlash) -> 
                         selected = oTT.fnGetSelected(oTable)
                         pk = get_selected_id(selected)
-                        if oTT.fnGetSelected(oTable).length == 0
+                        if selected < 1
                             alert('Please select a device')
                         else if get_td("Status", parseInt(pk)) == "Checked in"
                             alert("Device is already checked in")
@@ -40,9 +41,17 @@ initialize_table = () ->
                 # Edit
                 {
                     'sExtends': 'text',
-                    'sButtonClass': 'btn btn-large btn-info btn-edit',
+                    'sButtonClass': 'btn btn-large btn-info btn-edit-device',
                     'sButtonText': '<i class="icon-pencil"></i> Edit device'
-                }
+                    'fnClick': (nButton, oConfig, oFlash) ->
+                            selected = oTT.fnGetSelected(oTable)
+                            if selected.length < 1
+                                alert("Please select a device.")
+                            else
+                                # redirect to device edit page
+                                pk = get_selected_id(selected)
+                                window.location = "/devices/#{pk}/edit/"
+                },
                 # Export csv
                 {
                     'sExtends': 'csv',
@@ -92,18 +101,10 @@ checkin_selected = () ->
     pk = get_selected_id(selected)
     window.location = "/devices/#{pk}/checkin"
 
-# delete_selected = () ->
-#     ###
-#     Redirects user to the delete page for the selected device.
-#     ###
-#     selected = oTT.fnGetSelected(oTable)
-#     pk = get_selected_id(selected)
-#     window.location = "/devices/#{pk}/delete"
 
-# # Add click handler for delete button
-# $('#id_delete_btn').click((e) -> delete_selected() )
-
-$("#id_delete_btn").click( () ->
+# Add click handler for device delete button
+$("#id_delete_btn").click( (e) ->
+    e.preventDefault()
     selected = oTT.fnGetSelected(oTable)
     if selected.length < 1 
         alert("No device selected.")
@@ -120,6 +121,7 @@ WARNING: This action is irreversible.")
                     window.location = "/devices/"
             )
 )
+
 
 change_td = (column_name, pk, new_text) ->
     ###

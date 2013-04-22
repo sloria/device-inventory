@@ -6,10 +6,12 @@ from inventory.devices.views import *
 
 
 urlpatterns = patterns('',
+    # ex: /devices
     url(r'^$', 
         DevicesListView.as_view(),
         name='index'),
 
+    # ex: /devices/add
     url(r'^add/$', 
         DeviceAdd.as_view(),
         name='add'),
@@ -40,6 +42,7 @@ urlpatterns = patterns('',
         DeviceCheckin.as_view(),
         name='checkin'),
 
+    # ex: /devices/3/edit
     url(r'^(?P<pk>\d+)/edit/$',
         DeviceUpdate.as_view(),
         name='update')

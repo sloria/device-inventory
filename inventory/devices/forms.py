@@ -62,3 +62,23 @@ class CheckinForm(forms.Form):
             )
         )
         super(CheckinForm, self).__init__(*args, **kwargs)
+
+class DeviceEditForm(forms.Form):
+    '''Form for updating a device's attributes.
+    '''
+
+    def __init__(self, instance, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_id = 'edit_form'
+        self.helper.form_class = "form-widget"
+        self.helper.form_method = 'post'
+        self.helper.layout = Layout(
+            Fieldset(
+                "Edit device",
+            ),
+            ButtonHolder(
+                Submit('submit', "Submit")
+            )
+        )
+        super(DeviceEditForm, self).__init__(instance, *args, **kwargs)
+

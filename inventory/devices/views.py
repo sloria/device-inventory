@@ -11,7 +11,7 @@ import verhoeff
 
 from inventory.devices.models import Device, Lendee
 from inventory.user.models import Subject
-from inventory.devices.forms import DeviceForm, CheckinForm
+from inventory.devices.forms import DeviceForm, CheckinForm, DeviceEditForm
 
 
 class DevicesListView(ListView):
@@ -163,5 +163,6 @@ class DeviceCheckin(FormView):
 
 class DeviceUpdate(UpdateView):
     model = Device
+    template_name = 'devices/edit.html'
 
 
