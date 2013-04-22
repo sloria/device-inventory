@@ -48,8 +48,10 @@
         <td>{{ device.name }}</td>
         <td>{{ device.get_status_display }}</td>
         <td>
-          {% if device.lendee %}
+          {% if device.lendee.user %}
           {{ device.lendee.get_last_name_first }}
+          {% elif device.lendee.subject %}
+          Subject: {{ device.lendee.subject.subject_id }}
           {% else %}
           -----
           {% endif %}

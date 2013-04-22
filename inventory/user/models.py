@@ -9,7 +9,7 @@ class Subject(models.Model):
     '''
     first_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
-    subject_id = models.CharField(max_length=200, null=False)
+    subject_id = models.IntegerField(max_length=200, null=False)
 
     def validate_id(self):
         # TODO

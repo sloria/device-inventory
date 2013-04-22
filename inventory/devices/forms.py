@@ -14,7 +14,7 @@ class DeviceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_id = 'device_form'
-        self.helper.form_class = 'form-create'
+        self.helper.form_class = 'form-widget'
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
             Fieldset(
@@ -50,7 +50,15 @@ class CheckinForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_id = 'checkin_form'
+        self.helper.form_class = "form-widget"
         self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Submit'))
-
+        self.helper.layout = Layout(
+            Fieldset(
+                "Check in",
+                'condition'
+            ),
+            ButtonHolder(
+                Submit('submit', "Submit")
+            )
+        )
         super(CheckinForm, self).__init__(*args, **kwargs)

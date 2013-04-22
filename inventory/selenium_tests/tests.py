@@ -1,7 +1,7 @@
 '''Functional tests using Selenium'''
 import time
 from nose.tools import *
-from inventory.user.tests.factories import ExperimenterFactory
+from inventory.user.tests.factories import ExperimenterFactory, SubjectFactory
 from inventory.devices.tests.factories import DeviceFactory
 from inventory.devices.models import Device
 
@@ -12,6 +12,8 @@ class TestAnExperimenter(SeleniumTestCase):
     def setUp(self):
         # Create a user (Experimenter)
         self.experimenter = ExperimenterFactory()
+        # Create a subject
+        self.subject = SubjectFactory()
         # create a device
         self.device = DeviceFactory()
         self.driver = CustomWebDriver()
@@ -64,7 +66,7 @@ class TestAnExperimenter(SeleniumTestCase):
                 format(name=self.experimenter.user.get_full_name()),
                 dialog.text)
         dialog.accept()  # click accept
-        time.sleep(3)
+        time.sleep(2)
         # db record is updated
         device = Device.objects.get(pk=self.device.pk)
         assert_equal(device.status, Device.CHECKED_OUT)
@@ -78,7 +80,7 @@ class TestAnExperimenter(SeleniumTestCase):
     def test_can_check_in(self):
         # clicks on the table row for the device
         self.driver.find_css("tbody tr").click()
-        # clicks check out 
+        # clicks check in
         self.driver.find_css('.btn-checkin').click()
         # at the checkin page
         self.driver.click_submit()
@@ -91,5 +93,37 @@ class TestAnExperimenter(SeleniumTestCase):
         self.driver.find_css('tbody tr').click()
         # clicks check out
         self.driver.find_css('.btn-checkout').click()
+        # an dialog comes up
         dialog = self.driver.switch_to_alert()
-        dialog.send_keys()
+        # enters an invalid subject ID
+        dialog.send_keys("123")
+        # clicks OK
+        dialog.accept()
+        # another dialog with an error message appears
+        dialog = self.driver.switch_to_alert()
+        assert_in(u"Invalid subject ID. Please try again.",
+                    dialog.text)
+        # dismisses the msg
+        dialog.accept()
+        # clicks checkout again
+        self.driver.find_css('.btn-checkout').click()
+        dialog = self.driver.switch_to_alert()
+        # enters a valid subject ID
+        dialog.send_keys("123451")
+        dialog.accept()
+        # a confirm msg comes up
+        dialog = self.driver.switch_to_alert()
+        assert_in('Confirm check out to Subject 123451?',
+                            dialog.text)
+        # clicks OK
+        dialog.accept()
+        time.sleep(2)
+        # db record is updated
+        device = Device.objects.get(pk=self.device.pk)
+        assert_equal(device.status, Device.CHECKED_OUT)
+        assert_equal(device.lendee.subject.subject_id, 123451)
+        # updated status is shown on page
+        assert_in('Successfully checked out', self.driver.body_text())
+        assert_in("Subject: 123451", self.driver.body_text())
+
+

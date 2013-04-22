@@ -3,7 +3,8 @@
 from factory import Factory, SubFactory, Sequence
 
 from django.contrib.auth.models import User
-from inventory.user.models import Experimenter, Reader, Lendee
+from inventory.user.models import (Experimenter, 
+            Reader, Lendee, Subject)
 
 class UserFactory(Factory):
     FACTORY_FOR = User
@@ -38,3 +39,8 @@ class LendeeFactory(Factory):
     FACTORY_FOR = Lendee
 
     user = SubFactory(UserFactory)
+
+class SubjectFactory(Factory):
+    FACTORY_FOR = Subject
+
+    subject_id = 123451

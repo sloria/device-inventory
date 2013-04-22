@@ -74,7 +74,7 @@ checkout_selected = (lendee) ->
                 alert(data.error)
             else
                 # Show confirmation dialog
-                confirmed = confirm("Confirm check out to #{data.full_name}?")
+                confirmed = confirm("Confirm check out to #{data.name}?")
                 if confirmed
                     $.ajax(
                         url: "/devices/#{pk}/checkout/confirm",

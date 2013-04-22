@@ -75,7 +75,7 @@
         if (data.error) {
           return alert(data.error);
         } else {
-          confirmed = confirm("Confirm check out to " + data.full_name + "?");
+          confirmed = confirm("Confirm check out to " + data.name + "?");
           if (confirmed) {
             return $.ajax({
               url: "/devices/" + pk + "/checkout/confirm",

@@ -10,6 +10,7 @@ from django.views.generic import View, ListView, CreateView, DeleteView, UpdateV
 import verhoeff
 
 from inventory.devices.models import Device, Lendee
+from inventory.user.models import Subject
 from inventory.devices.forms import DeviceForm, CheckinForm
 
 
@@ -74,27 +75,36 @@ class DeviceCheckout(View):
         data = {}
         try:
             # if it's a valid subject id
-            if verhoeff.validate(int(lendee)):
-                pass
-                # redirect to subject creation page
+            subject_id = int(lendee)
+            if verhoeff.validate(subject_id):
                 # get or create the subject
+                subject, created = Subject.objects.get_or_create(subject_id=subject_id)
+                if created:
+                    data['created_subject'] = True
+                else:
+                    data['created_subject'] = False
                 # get or create the lendee with the subject as the lendee
+                lendee_obj, created = Lendee.objects.get_or_create(subject=subject)
+                data['name'] = "Subject {id}".format(id=subject_id)
+                data['success'] = True
+            else:
+                data['error'] = "Invalid subject ID. Please try again."
         # else it's a user
         except ValueError:
             try:
                 # get the user
                 user = User.objects.get(username=lendee)
                 # get or create the lendee with the user as the user
-                data['full_name'] = user.get_full_name()
-                lendee = Lendee.objects.get_or_create(user=user)
+                data['name'] = user.get_full_name()
+                Lendee.objects.get_or_create(user=user)
                 data['success'] = True
             except ObjectDoesNotExist:
                 data['error'] = 'No user found with e-mail address {email}'.format(email=lendee)
             # return json response
-            json_data = json.dumps(data)
-            return HttpResponse(json_data, mimetype='application/json')
+        json_data = json.dumps(data)
+        return HttpResponse(json_data, mimetype='application/json')
 
-        return redirect('devices:index')
+        # return redirect('devices:index')
 
 class DeviceCheckoutConfirm(View):
     '''View for confirming the checkout of a device.
@@ -103,8 +113,14 @@ class DeviceCheckoutConfirm(View):
     def post(self, request, pk):
         data = {}
         # Lendee email has already been validate in DeviceCheckout
-        lendee_email = request.POST['lendee']
-        lendee_obj = Lendee.objects.get(user__username=lendee_email)
+        lendee = request.POST['lendee']
+        try:
+            # if lendee is a subject
+            subject_id = int(lendee)
+            lendee_obj = Lendee.objects.get(subject__subject_id=subject_id)
+        except ValueError:
+            # if lendee is a user
+            lendee_obj = Lendee.objects.get(user__username=lendee)
         # Update the device's lendee, lender, and status
         Device.objects.filter(pk=pk).update(lendee=lendee_obj,
                                             lender=request.user,
