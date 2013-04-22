@@ -19,7 +19,6 @@ initialize_table = () ->
                             ret = prompt("Check OUT - Enter a subject ID or user's e-mail address: ", "")
                             if (ret)
                                 checkout_selected(ret)
-                    'sucess'
 
                 },
                 # Check in
@@ -93,16 +92,34 @@ checkin_selected = () ->
     pk = get_selected_id(selected)
     window.location = "/devices/#{pk}/checkin"
 
-delete_selected = () ->
-    ###
-    Redirects user to the delete page for the selected device.
-    ###
-    selected = oTT.fnGetSelected(oTable)
-    pk = get_selected_id(selected)
-    window.location = "/devices/#{pk}/delete"
+# delete_selected = () ->
+#     ###
+#     Redirects user to the delete page for the selected device.
+#     ###
+#     selected = oTT.fnGetSelected(oTable)
+#     pk = get_selected_id(selected)
+#     window.location = "/devices/#{pk}/delete"
 
-# Add click handler for delete button
-$('#id_delete_btn').click((e) -> delete_selected() )
+# # Add click handler for delete button
+# $('#id_delete_btn').click((e) -> delete_selected() )
+
+$("#id_delete_btn").click( () ->
+    selected = oTT.fnGetSelected(oTable)
+    if selected.length < 1 
+        alert("No device selected.")
+    else 
+        confirmed = confirm("Are you sure you want to delete this device?\n
+WARNING: This action is irreversible.")
+        pk = get_selected_id(selected)
+        if confirmed
+            $.ajax(
+                url: "/devices/#{pk}/delete/",
+                type: "POST"
+                success: (data) ->
+                    # Refresh the page
+                    window.location = "/devices/"
+            )
+)
 
 change_td = (column_name, pk, new_text) ->
     ###
@@ -115,7 +132,7 @@ change_td = (column_name, pk, new_text) ->
                 .eq(col_idx)
                 .html(new_text)
 
-window.get_td = (column_name, pk) ->
+get_td = (column_name, pk) ->
     ###
     Get the text of a table cell at the column that contains the
     text column_name and the row of the device with a given pk.

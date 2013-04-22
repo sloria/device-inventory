@@ -43,15 +43,16 @@ class DeviceAdd(CreateView):
         else:
             return redirect('devices:permission_denied')
 
-class DeviceDelete(DeleteView):
-    ''' View for deleting a single instance.
-    '''
-    model = Device
-    template_name = 'devices/delete.html'
-    context_object_name = 'object'
-
-    def get_success_url(self):
-        return reverse_lazy('devices:index')
+class DeviceDelete(View):
+    def post(self, request, pk):
+        """Deletes the device with the given pk.
+        """
+        data = {}
+        Device.objects.filter(pk=pk).delete()
+        messages.success(request, 'Successfully deleted device.')
+        data['success'] = True
+        json_data = json.dumps(data)
+        return HttpResponse(json_data, mimetype="application/json")
 
 class DeviceCheckout(View):
     '''View for checking out a device.

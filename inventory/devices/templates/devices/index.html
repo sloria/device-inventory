@@ -77,15 +77,7 @@
 {% endblock content %}
 
 {% block scripts %}
-<script>
-  // Show confirmation dialog before deleting devices
-  $("#device_control").submit(function() {
-    if ($("select[name='action']").val() == "delete_selected") {
-        var c = confirm("Are you sure you want to delete the selected devices?");
-        return c;
-    }
-});
-</script>
+
 {# Datatables initialization #}
 <script src="{{ STATIC_URL }}/js/datatables_init.js"></script>
 {% endblock scripts %}
