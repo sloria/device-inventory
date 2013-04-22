@@ -28,7 +28,10 @@
   <hr> 
   {% endif %}
 
+{# Only show device actions for admins and experimenters #}
+{% if perms.user.can_update_device_attributes %}
   <h2>Device actions</h2>
+{% endif %}
   
   {% if all_devices.count %}  
   <table id="id_devices_table" class='table table-striped'>
@@ -79,5 +82,7 @@
 {% block scripts %}
 
 {# Datatables initialization #}
+{% if perms.user.can_update_device_attributes %}
 <script src="{{ STATIC_URL }}/js/datatables_init.js"></script>
+{% endif %}
 {% endblock scripts %}

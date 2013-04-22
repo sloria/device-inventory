@@ -18,7 +18,7 @@ class AdminUserTest(TestCase):
         assert_true(self.user.has_perm('devices.delete_device'))
 
     def test_can_change_device_status(self):
-        assert_true(self.user.has_perm('devices.can_change_device_status'))
+        assert_true(self.user.has_perm('user.can_change_device_status'))
 
 class ExperimenterTest(TestCase):
     def setUp(self):
@@ -33,7 +33,7 @@ class ExperimenterTest(TestCase):
         assert_false(self.experimenter.user.has_perm('devices.add_device'))
 
     def test_can_change_device_status(self):
-        assert_true(self.experimenter.user.has_perm('devices.can_change_device_status'))
+        assert_true(self.experimenter.user.has_perm('user.can_change_device_status'))
 
 class ReaderTest(TestCase):
     def setUp(self):
@@ -46,4 +46,4 @@ class ReaderTest(TestCase):
         assert_false(self.reader.user.has_perm('devices.delete_device'))
 
     def test_cannot_change_device_status(self):
-        assert_false(self.reader.user.has_perm('devices.can_change_device_status'))
+        assert_false(self.reader.user.has_perm('user.can_change_device_status'))

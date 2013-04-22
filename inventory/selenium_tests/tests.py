@@ -125,5 +125,3 @@ class TestAnExperimenter(SeleniumTestCase):
         # updated status is shown on page
         assert_in('Successfully checked out', self.driver.body_text())
         assert_in("Subject: 123451", self.driver.body_text())
-
-
