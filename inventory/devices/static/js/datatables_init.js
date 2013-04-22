@@ -2,12 +2,27 @@
 (function() {
   var change_td, checkin_selected, checkout_selected, get_selected_id, get_selected_ids, get_td, initialize_table;
 
+  $(function() {
+    window.oTable = initialize_table();
+    window.oTT = TableTools.fnGetInstance('id_devices_table');
+    return oTable.yadcf([
+      {
+        column_number: 1,
+        filter_default_label: "Status"
+      }, {
+        column_number: 5,
+        filter_default_label: "Condition"
+      }
+    ]);
+  });
+
   initialize_table = function() {
     /*
         Initialize jQuery Datatables
     */
     return $('#id_devices_table').dataTable({
       "sDom": "<'row-fluid'<'span6'T><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+      "aoColumnDefs": [],
       "oTableTools": {
         "sSwfPath": '/static/libs/datatables/extras/TableTools/media/swf/copy_csv_xls.swf',
         'sRowSelect': 'single',
@@ -66,11 +81,6 @@
       }
     });
   };
-
-  $(function() {
-    window.oTable = initialize_table();
-    return window.oTT = TableTools.fnGetInstance('id_devices_table');
-  });
 
   checkout_selected = function(lendee) {
     var pk, selected;

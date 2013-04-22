@@ -6,12 +6,12 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
-from django.views.generic import View, ListView, CreateView, DeleteView, UpdateView, FormView
+from django.views.generic import View, ListView, CreateView, UpdateView, FormView
 import verhoeff
 
 from inventory.devices.models import Device, Lendee
 from inventory.user.models import Subject
-from inventory.devices.forms import DeviceForm, CheckinForm, DeviceEditForm
+from inventory.devices.forms import DeviceForm, CheckinForm
 
 
 class DevicesListView(ListView):
@@ -164,5 +164,10 @@ class DeviceCheckin(FormView):
 class DeviceUpdate(UpdateView):
     model = Device
     template_name = 'devices/edit.html'
+    context_object_name = 'device'
+
+    def get_success_url(self):
+        return reverse_lazy('devices:index')
+
 
 

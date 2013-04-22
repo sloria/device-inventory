@@ -1,5 +1,5 @@
 {% load url from future %}
-<header class="navbar navbar-inverse navbar-fixed-top">
+<header class="navbar navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container">
       <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -17,7 +17,7 @@
         <form class="navbar-form pull-right" action="{% url 'auth_logout' %}" method="get">
           <ul class="nav pull-right">
           <li><a>Welcome back, {{ user.first_name }}!</a></li>
-          <li><button type="submit" class="btn">Logout</button></li>   
+          <li><button type="submit" class="btn btn-default">Logout</button></li>   
           </ul>
         </form>
         {% else %}

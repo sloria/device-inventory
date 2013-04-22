@@ -9,13 +9,13 @@
   <h2>Admin actions</h2>    
   {% endif %}
   {% if perms.devices.add_device %}
-  <a href="{% url 'devices:add' %}" class="btn">
+  <a href="{% url 'devices:add' %}" class="btn btn-default">
     <i class="icon-plus icon-white"></i>
     Add device    
   </a>
   {% endif %}
   {% if perms.user.add_user %}
-  <a href="{% url 'users:create_user' %}" class="btn">
+  <a href="{% url 'users:create_user' %}" class="btn btn-default">
     <i class="icon-user"></i>
     Create user    
   </a>
@@ -36,13 +36,12 @@
   {% if all_devices.count %}  
   <table id="id_devices_table" class='table table-striped'>
     <thead>
-      {# <th>Select</th> #}
       <th>Name</th>
-      <th>Status</th>
+      <th></th>
       <th>Lent to</th>
       <th>Lender</th>
       <th>Serial number</th>
-      <th>Condition</th>
+      <th></th>
     </thead>
     <tbody>
     {% for device in all_devices %}

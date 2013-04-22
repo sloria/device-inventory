@@ -1,9 +1,24 @@
+$( () ->
+    window.oTable = initialize_table()
+    window.oTT = TableTools.fnGetInstance('id_devices_table')
+    # Enable column filtering
+    oTable.yadcf([
+        # Make the Status column filter-able
+        {column_number: 1, filter_default_label: "Status"}
+        # Make the Condition column filter-able
+        {column_number: 5, filter_default_label: "Condition"}
+    ])
+)
+
 initialize_table = () ->
     ###
     Initialize jQuery Datatables
     ###
     $('#id_devices_table').dataTable({
         "sDom": "<'row-fluid'<'span6'T><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
+        "aoColumnDefs": [
+        ]
+
         "oTableTools": {
             "sSwfPath": '/static/libs/datatables/extras/TableTools/media/swf/copy_csv_xls.swf',
             'sRowSelect': 'single',
@@ -62,11 +77,6 @@ initialize_table = () ->
             ]
         }
     })
-
-$( () ->
-    window.oTable = initialize_table()
-    window.oTT = TableTools.fnGetInstance('id_devices_table')
-)
 
 checkout_selected = (lendee) ->
     selected = oTT.fnGetSelected(oTable)

@@ -13,10 +13,11 @@
 
    ========================================================================== */
 
-@import url('bootstrap.css');
+@import url('cosmo.min.css');
 @import url('bootstrap-responsive.css');
 @import url('../libs/fontawesome/css/font-awesome.min.css');
 @import url('../libs/datatables/media/css/jquery.dataTables.css');
 @import url('../libs/datatables/media/css/dataTables.bootstrap.css');
+@import url('../libs/datatables/extras/yadcf/jquery.dataTables.yadcf.css');
 @import url('app.css');
 

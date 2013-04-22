@@ -28,6 +28,13 @@ textarea {
     margin-bottom: 10px;
 }
 
+.btn-default {
+  color: #000000;
+}
+
+.btn-toolbar {
+  font-size: 1em;
+}
 
 /* Forms */
 .form-widget {
@@ -74,11 +81,17 @@ textarea {
 
 /* Datatables + bootstrap */
 div.DTTT .btn {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 div.DTTT .btn:hover {
   text-decoration: none !important;
+}
+
+
+/* YADCF (column filters) */
+select.yadcf-filter {
+  width: 100%;
 }
 
 /* footer */

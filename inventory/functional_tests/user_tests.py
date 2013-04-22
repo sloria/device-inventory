@@ -1,4 +1,4 @@
-'''Functional tests using a user'''
+'''Functional tests for a user'''
 
 from django_webtest import WebTest
 from nose.tools import *
@@ -38,7 +38,7 @@ class TestAUser(WebTest):
         res = res.follow()
         assert_equal(res.status_code, 200)
         assert_true(self.user.is_authenticated())
-        assert_in('Logged in as {}'.format(self.user.get_full_name()), res)
+        assert_in('Welcome back, {0}!'.format(self.user.first_name), res)
         # Rosie is at the inventory page
         assert_equal(res.request.path, '/devices/')
 
