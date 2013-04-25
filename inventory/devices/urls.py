@@ -45,5 +45,6 @@ urlpatterns = patterns('',
     # ex: /devices/3/edit
     url(r'^(?P<pk>\d+)/edit/$',
         DeviceUpdate.as_view(),
-        name='update')
+        name='update'),
+
 )

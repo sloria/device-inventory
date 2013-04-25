@@ -22,4 +22,3 @@ South
 
 # Various tidbits
 # commonware
-

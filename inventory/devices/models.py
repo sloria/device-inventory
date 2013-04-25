@@ -5,8 +5,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 from inventory.user.models import Lendee
-
-        
+ 
 class Device(models.Model):
     '''A device.
     '''
@@ -49,10 +48,10 @@ class Device(models.Model):
     created_at = models.DateTimeField('created at', default=timezone.now())
     updated_at = models.DateTimeField('updated at', default=timezone.now())
     lendee = models.ForeignKey(Lendee, null=True, blank=True, unique=False)
-    lender = models.ForeignKey(User, null=True, blank=True, unique=False)
+    lender = models.ForeignKey(User, null=True, blank=True, unique=False, related_name='lenders')
 
     def __unicode__(self):
-        return unicode("name: {}, status: {}".format(self.name, self.status))
+        return unicode("name: {0}, status: {1}".format(self.name, self.status))
 
     def get_cname(self):
         return 'device'
@@ -62,3 +61,18 @@ class Device(models.Model):
             ('can_change_device_status', "Can change device status"),
             ('can_update_device_attributes', "Can update device attributes")
         )
+        get_latest_by = 'created_at'
+        ordering = ['-created_at', '-updated_at']
+
+class Comment(models.Model):
+    """A comment for a device. These are added when devices
+    are checked in."""
+    text = models.TextField(max_length=1000, null=False, blank=False)
+    device = models.ForeignKey(Device, related_name='comments')
+    created_at = models.DateTimeField('created at', default=timezone.now())
+    updated_at = models.DateTimeField('updated at', default=timezone.now())
+
+    def get_cname(self):
+        return 'comment'
+
+

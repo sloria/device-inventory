@@ -1,4 +1,4 @@
-# Create your views here.
+"""Devices views."""
 from django.core.urlresolvers import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseRedirect
@@ -7,10 +7,13 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
 from django.views.generic import View, ListView, CreateView, UpdateView, FormView
+from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
 import verhoeff
+import reversion
 
-from inventory.devices.models import Device, Lendee
-from inventory.user.models import Subject
+from inventory.devices.models import Device, Comment
+from inventory.user.models import Subject, Lendee
 from inventory.devices.forms import DeviceForm, CheckinForm
 
 
@@ -27,6 +30,12 @@ class DevicesListView(ListView):
             return super(DevicesListView, self).get(self, request)
         else:
             return redirect('home')
+
+    def get_context_data(self, **kwargs):
+        context = super(DevicesListView, self).get_context_data(**kwargs)
+        context['contenttype_id'] = ContentType.objects.get_for_model(Device).pk
+        return context
+
 
 class DeviceAdd(CreateView):
     '''View for adding a device.
@@ -58,15 +67,6 @@ class DeviceCheckout(View):
     '''View for checking out a device.
     Passes a list of possible lendees to the template for selection.
     '''
-    # TODO
-    def get(self, request, pk):
-        request.session['last_device_id'] = pk
-        if Lendee.objects.exists():
-            lendees = Lendee.objects.all()
-            return render(request, 'devices/checkout.html', {'lendees': lendees})
-        else:
-            return render(request, 'devices/checkout.html', {'lendees': False})
-
     def post(self, request, pk):
         '''Checks out a device to either a user or a subject.
         '''
@@ -122,10 +122,13 @@ class DeviceCheckoutConfirm(View):
         except ValueError:
             # if lendee is a user
             lendee_obj = Lendee.objects.get(user__username=lendee)
-        # Update the device's lendee, lender, and status
-        Device.objects.filter(pk=pk).update(lendee=lendee_obj,
-                                            lender=request.user,
-                                            status=Device.CHECKED_OUT)
+        # Update the device's lendee, lender, status, and updated at time
+        device = Device.objects.get(pk=pk)
+        device.lendee = lendee_obj
+        device.lender = request.user
+        device.status = Device.CHECKED_OUT
+        device.updated_at = timezone.now()
+        device.save()
         data['success'] = True
         json_data = json.dumps(data)
         messages.success(request, 'Successfully checked out device')
@@ -153,10 +156,16 @@ class DeviceCheckin(FormView):
         else:
             device.status = Device.CHECKED_IN
             device.condition = Device.EXCELLENT
+
         # Set the lendee and lender to None
         device.lendee = None
         device.lender = None
+        device.updated_at = timezone.now()
         device.save()
+        # save the comment if it exists
+        if form.cleaned_data['comment']:
+            Comment.objects.create(text=form.cleaned_data['comment'],
+                                    device=device)
         messages.success(self.request, 'Successfully checked in')
         # Change device condition
         return super(DeviceCheckin, self).form_valid(form)

@@ -49,8 +49,3 @@ class TestAUser(WebTest):
         # She is taken to the inventory page
         assert_equal(res.request.path, '/devices/')
 
-
-
-
-
-

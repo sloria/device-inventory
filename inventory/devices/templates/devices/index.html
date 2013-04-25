@@ -14,6 +14,7 @@
     Add device    
   </a>
   {% endif %}
+
   {% if perms.user.add_user %}
   <a href="{% url 'users:create_user' %}" class="btn btn-default">
     <i class="icon-user"></i>
@@ -37,11 +38,12 @@
   <table id="id_devices_table" class='table table-striped'>
     <thead>
       <th>Name</th>
-      <th></th>
+      <th></th> {# Status #}
       <th>Lent to</th>
       <th>Lender</th>
       <th>Serial number</th>
-      <th></th>
+      <th></th> {# Condition #}
+      <th>Updated at</th>
     </thead>
     <tbody>
     {% for device in all_devices %}
@@ -68,6 +70,7 @@
         </td> 
         <td>{{ device.serial_number }}</td>
         <td>{{ device.get_condition_display }}</td>
+        <td>{{ device.updated_at }}</td>
       </tr>
     {% endfor %}
     </tbody>

@@ -49,7 +49,7 @@ class TestASuperUser(WebTest):
         assert_equal(res.request.path, '/devices/')
         # the new device's name, status, Lender/Lendee, serial number is displayed
         # headers
-        res.mustcontain('Name', 'Status', 'Lender', 'Lent to', 'Serial number')
+        res.mustcontain('Name', 'Lender', 'Lent to', 'Serial number', 'Updated at')
         res.mustcontain('iPad 4, 16GB, WiFi', 'Storage', '12345X67')
 
 

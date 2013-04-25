@@ -46,6 +46,9 @@ class CheckinForm(forms.Form):
     condition = forms.ChoiceField(label='Condition: ', widget=forms.Select,
                                     choices=CONDITIONS,
                                     required=True)
+    comment = forms.CharField(label="Comment: ", widget=forms.Textarea,
+                                    max_length=500,
+                                    required=False)
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
@@ -55,7 +58,8 @@ class CheckinForm(forms.Form):
         self.helper.layout = Layout(
             Fieldset(
                 "Check in",
-                'condition'
+                'condition',
+                'comment',
             ),
             ButtonHolder(
                 Submit('submit', "Submit")

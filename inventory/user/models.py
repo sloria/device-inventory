@@ -11,18 +11,14 @@ class Subject(models.Model):
     last_name = models.CharField(max_length=50, null=True, blank=True)
     subject_id = models.IntegerField(max_length=200, null=False)
 
-    def validate_id(self):
-        # TODO
-        pass
-
     def __unicode__(self):
         return unicode(self.subject_id)
 
 class Experimenter(models.Model):
     '''An experimenter.
     '''
-    user = models.OneToOneField(User, unique=True)
-
+    user = models.OneToOneField(User, unique=True, related_name='exp_user')
+    
     def __unicode__(self):
         return unicode(self.user)
 
@@ -40,20 +36,22 @@ class Experimenter(models.Model):
                                         codename='can_update_device_attributes',
                                         content_type=content_type
                                     )
-        self.user.user_permissions.add(change_status_perm, change_attributes_perm)
+        self.user.user_permissions.add(change_status_perm, 
+                                        change_attributes_perm)
         self.user.save()
         super(Experimenter, self).save()
 
-    
     def get_last_name_first(self):
         return "{0}, {1}".format(self.user.last_name, self.user.first_name)
 
 class Lendee(models.Model):
     '''A lendee. May either be a user or a subject (but not both).
     '''
-    # TODO: shouldn't be able to have both a user and a subject. Rethink.
-    user = models.OneToOneField(User, unique=True, null=True, blank=True)
-    subject = models.OneToOneField(Subject, unique=True, null=True, blank=True)
+    user = models.OneToOneField(User, unique=True, 
+                                    null=True, blank=True, 
+                                    related_name='lendee_user')
+    subject = models.OneToOneField(Subject, unique=True, 
+                                    null=True, blank=True)
 
     def __unicode__(self):
         return unicode(self.user)
@@ -65,14 +63,17 @@ class Lendee(models.Model):
         Example: Hooker, John
         '''
         if self.user:
-            return "{0}, {1}".format(self.user.last_name, self.user.first_name)
+            return "{0}, {1}".format(self.user.last_name, 
+                                    self.user.first_name)
         else:
-            return "{0}, {1}".format(self.subject.last_name, self.subject.first_name)
+            return "{0}, {1}".format(self.subject.last_name, 
+                                    self.subject.first_name)
 
 class Reader(models.Model):
     '''A reader. Can only view devices (cannot add/delete/change/status).
     '''
-    user = models.OneToOneField(User, unique=True)
+    user = models.OneToOneField(User, unique=True, 
+                                related_name='reader_user')
 
     def __unicode__(self):
         return unicode(self.user)
