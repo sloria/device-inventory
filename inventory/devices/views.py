@@ -10,7 +10,6 @@ from django.views.generic import View, ListView, CreateView, UpdateView, FormVie
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 import verhoeff
-import reversion
 
 from inventory.devices.models import Device, Comment
 from inventory.user.models import Subject, Lendee

@@ -14,11 +14,12 @@ initialize_table = () ->
     ###
     Initialize jQuery Datatables
     ###
+    updated_at_idx = get_col_idx('Updated at')
     $('#id_devices_table').dataTable({
         "sDom": "<'row-fluid'<'span6'T><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
         "aoColumnDefs": [
-        ]
-
+        ],
+        "aaSorting": [[updated_at_idx, "desc"]]
         "oTableTools": {
             "sSwfPath": '/static/libs/datatables/extras/TableTools/media/swf/copy_csv_xls.swf',
             'sRowSelect': 'single',
@@ -154,6 +155,13 @@ get_td = (column_name, pk) ->
                 .find('td')
                 .eq(col_idx)
                 .text()
+
+get_col_idx = (column_name) ->
+    ###
+    Return the index of the table column that contains the text
+    column_name.
+    ###
+    return $("th:contains('#{column_name}')").index()
 
 get_selected_id = (selected) ->
     ###
