@@ -42,7 +42,7 @@ initialize_table = () ->
                 {
                     'sExtends': 'text',
                     'sButtonClass': 'btn btn-large btn-warning btn-checkin',
-                    'sButtonText': '<i class="icon-signin"></i> Check IN'
+                    'sButtonText': '<i class="icon-signin"></i> Check IN',
                     "fnClick": (nButton, oConfig, oFlash) -> 
                         selected = oTT.fnGetSelected(oTable)
                         pk = get_selected_id(selected)
@@ -52,12 +52,22 @@ initialize_table = () ->
                             alert("Device is already checked in")
                         else
                             checkin_selected()
-
+                },
+                # View details
+                {
+                    'sExtends': 'text',
+                    'sButtonClass': 'btn btn-large btn-info btn-detail',
+                    'sButtonText': '<i class="icon-info-sign"></i> View detail',
+                    'fnClick': (nButton, oConfig, oFlash) ->
+                        # On click, go to the detail page for the selected device
+                        selected = oTT.fnGetSelected(oTable)
+                        pk = get_selected_id(selected)
+                        window.location = "/devices/#{pk}/"
                 },
                 # Edit
                 {
                     'sExtends': 'text',
-                    'sButtonClass': 'btn btn-large btn-info btn-edit-device',
+                    'sButtonClass': 'btn btn-large btn-default btn-edit-device',
                     'sButtonText': '<i class="icon-pencil"></i> Edit device'
                     'fnClick': (nButton, oConfig, oFlash) ->
                             selected = oTT.fnGetSelected(oTable)
@@ -68,12 +78,12 @@ initialize_table = () ->
                                 pk = get_selected_id(selected)
                                 window.location = "/devices/#{pk}/edit/"
                 },
-                # Export csv
-                {
-                    'sExtends': 'csv',
-                    'sButtonClass': 'btn btn-large btn-default btn-export'
-                    'sButtonText': '<i class="icon-file"></i> Export'
-                },
+                # # Export csv
+                # {
+                #     'sExtends': 'csv',
+                #     'sButtonClass': 'btn btn-large btn-default btn-export'
+                #     'sButtonText': '<i class="icon-file"></i> Export'
+                # },
 
             ]
         }

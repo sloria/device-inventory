@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title center">{{ device.name }} ({{ device.serial_number }})</h1>
+
+<dl id="id-device_info" class="dl-horizontal">
+    <dt>Name</dt>
+    <dd>{{ device.name }}</dd>
+    <dt>Last updated</dt>
+    <dd>{{ device.updated_at }}</dd>
+    <dt>Status</dt>
+    <dd class='text-info'>{{ device.get_status_display }}</dd>
+    <dt>Condition</dt>
+    <dd>{{ device.get_condition_display }}</dd>
+    <dt>Description</dt>
+    <dd>{{ device.description }}</dd>
+    {% if device.responsible_party %}
+    <dt>Responsible party</dt>
+    <dd>{{ device.responsible_party }}</dd>  
+    {% endif %}
+    <dt>Make</dt>
+    <dd>{{ device.make }}</dd>
+    <dt>Serial</dt>
+    <dd>{{ device.serial_number }}</dd>
+    <dt>Purchased at</dt>
+    <dd>{{ device.purchased_at }}</dd>
+</dl>
+
+<h3>Check-in Comments</h3>
+<ul>
+    
+{% for comment in device.comments.all %}
+    <li>{{ comment.text }} ({{ comment.created_at }} by 
+            {{ comment.user.username }})</li>    
+{% endfor %}
+</ul>
+{% endblock content %}

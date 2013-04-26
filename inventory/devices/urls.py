@@ -11,6 +11,12 @@ urlpatterns = patterns('',
         DevicesListView.as_view(),
         name='index'),
 
+    # ex: /devices/3/
+    url(r'^(?P<pk>\d+)/$',
+        DeviceDetail.as_view(),
+        name='detail'
+        ),
+
     # ex: /devices/add
     url(r'^add/$', 
         DeviceAdd.as_view(),

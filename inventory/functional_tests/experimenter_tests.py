@@ -62,3 +62,14 @@ class TestAnExperimenter(WebTest):
         # logs in 
         res = self.app.get('/', user=self.experimenter.user).follow()
         assert_not_in('Create user', res)
+
+    def test_can_see_device_detail(self):
+        # a device is created
+        device = DeviceFactory()
+        # goes to its detail page
+        res = self.app.get('/devices/{pk}/'.format(pk=device.pk))
+        res.mustcontain(device.name,
+                        device.get_status_display(),
+                        device.get_condition_display(),
+                        device.serial_number)
+        assert False, 'finish me'

@@ -64,7 +64,17 @@
             }
           }, {
             'sExtends': 'text',
-            'sButtonClass': 'btn btn-large btn-info btn-edit-device',
+            'sButtonClass': 'btn btn-large btn-info btn-detail',
+            'sButtonText': '<i class="icon-info-sign"></i> View detail',
+            'fnClick': function(nButton, oConfig, oFlash) {
+              var pk, selected;
+              selected = oTT.fnGetSelected(oTable);
+              pk = get_selected_id(selected);
+              return window.location = "/devices/" + pk + "/";
+            }
+          }, {
+            'sExtends': 'text',
+            'sButtonClass': 'btn btn-large btn-default btn-edit-device',
             'sButtonText': '<i class="icon-pencil"></i> Edit device',
             'fnClick': function(nButton, oConfig, oFlash) {
               var pk, selected;
@@ -76,10 +86,6 @@
                 return window.location = "/devices/" + pk + "/edit/";
               }
             }
-          }, {
-            'sExtends': 'csv',
-            'sButtonClass': 'btn btn-large btn-default btn-export',
-            'sButtonText': '<i class="icon-file"></i> Export'
           }
         ]
       }

@@ -6,7 +6,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
-from django.views.generic import View, ListView, CreateView, UpdateView, FormView
+from django.views.generic import (View, ListView, DetailView,
+    CreateView, UpdateView, FormView)
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 import verhoeff
@@ -34,6 +35,13 @@ class DevicesListView(ListView):
         context = super(DevicesListView, self).get_context_data(**kwargs)
         context['contenttype_id'] = ContentType.objects.get_for_model(Device).pk
         return context
+
+class DeviceDetail(DetailView):
+    """Detail view for devices.
+    """
+    model = Device
+    context_object_name = 'device'
+    template_name = 'devices/detail.html'
 
 
 class DeviceAdd(CreateView):
@@ -164,7 +172,8 @@ class DeviceCheckin(FormView):
         # save the comment if it exists
         if form.cleaned_data['comment']:
             Comment.objects.create(text=form.cleaned_data['comment'],
-                                    device=device)
+                                    device=device,
+                                    user = self.request.user)
         messages.success(self.request, 'Successfully checked in')
         # Change device condition
         return super(DeviceCheckin, self).form_valid(form)

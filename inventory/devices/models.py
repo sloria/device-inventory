@@ -69,6 +69,7 @@ class Comment(models.Model):
     are checked in."""
     text = models.TextField(max_length=1000, null=False, blank=False)
     device = models.ForeignKey(Device, related_name='comments')
+    user = models.ForeignKey(User, related_name='comments')
     created_at = models.DateTimeField('created at', default=timezone.now())
     updated_at = models.DateTimeField('updated at', default=timezone.now())
 
