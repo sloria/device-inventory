@@ -19,7 +19,10 @@ initialize_table = () ->
         "sDom": "<'row-fluid'<'span6'T><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
         "aoColumnDefs": [
         ],
-        "aaSorting": [[updated_at_idx, "desc"]]
+        # Initially sort by 'updated at' date
+        "aaSorting": [[updated_at_idx, "desc"]],
+        # Initially show up to 50 devices
+        "iDisplayLength": 50,
         "oTableTools": {
             "sSwfPath": '/static/libs/datatables/extras/TableTools/media/swf/copy_csv_xls.swf',
             'sRowSelect': 'single',
@@ -57,7 +60,7 @@ initialize_table = () ->
                 {
                     'sExtends': 'text',
                     'sButtonClass': 'btn btn-large btn-info btn-detail',
-                    'sButtonText': '<i class="icon-info-sign"></i> View detail',
+                    'sButtonText': '<i class="icon-info-sign"></i> View details',
                     'fnClick': (nButton, oConfig, oFlash) ->
                         # On click, go to the detail page for the selected device
                         selected = oTT.fnGetSelected(oTable)
@@ -142,7 +145,6 @@ WARNING: This action is irreversible.")
                     window.location = "/devices/"
             )
 )
-
 
 change_td = (column_name, pk, new_text) ->
     ###

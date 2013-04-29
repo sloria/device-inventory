@@ -14,8 +14,7 @@ import verhoeff
 
 from inventory.devices.models import Device, Comment
 from inventory.user.models import Subject, Lendee
-from inventory.devices.forms import DeviceForm, CheckinForm
-
+from inventory.devices.forms import DeviceForm, CheckinForm, CommentEditForm
 
 class DevicesListView(ListView):
     '''Index view for devices.'''
@@ -70,6 +69,33 @@ class DeviceDelete(View):
         json_data = json.dumps(data)
         return HttpResponse(json_data, mimetype="application/json")
 
+class CommentEdit(UpdateView):
+    template_name = "devices/edit_comment.html"
+    model = Comment
+    form_class = CommentEditForm
+    pk_url_kwarg = "comment_id"
+
+    def form_valid(self, form):
+        # Update the devices updated_at attribute before saving
+        Device.objects.filter(pk=int(self.kwargs['device_id']))\
+                                .update(updated_at=timezone.now())
+        return super(CommentEdit, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('devices:detail', args=[self.kwargs['device_id']])
+
+class CommentDelete(View):
+    def post(self, request, device_id, comment_id):
+        '''Deletes the comment with the given pk.
+        '''
+        data = {}
+        Comment.objects.filter(pk=comment_id).delete()
+        messages.success(request, 'Successfully deleted comment.')
+        data['success'] = True
+        data['pk'] = comment_id
+        json_data = json.dumps(data)
+        return HttpResponse(json_data, mimetype='application/json')
+
 class DeviceCheckout(View):
     '''View for checking out a device.
     Passes a list of possible lendees to the template for selection.
@@ -107,12 +133,11 @@ class DeviceCheckout(View):
                 Lendee.objects.get_or_create(user=user)
                 data['success'] = True
             except ObjectDoesNotExist:
-                data['error'] = 'No user found with e-mail address {email}'.format(email=lendee)
+                data['error'] = 'No user found with e-mail address {email}'\
+                                                        .format(email=lendee)
             # return json response
         json_data = json.dumps(data)
         return HttpResponse(json_data, mimetype='application/json')
-
-        # return redirect('devices:index')
 
 class DeviceCheckoutConfirm(View):
     '''View for confirming the checkout of a device.

@@ -53,6 +53,16 @@ class Device(models.Model):
     def __unicode__(self):
         return unicode("name: {0}, status: {1}".format(self.name, self.status))
 
+    def get_verbose_status(self):
+        if self.status == Device.CHECKED_OUT:
+            if self.lendee.user:
+                return u'Checked out to {lendee}'\
+                            .format(lendee=self.lendee.user.get_full_name())
+            else:
+                return u'Checked out to Subject {id}'\
+                            .format(id=self.lendee.subject.subject_id)
+        else:
+            return self.get_status_display()
     def get_cname(self):
         return 'device'
         
@@ -62,7 +72,7 @@ class Device(models.Model):
             ('can_update_device_attributes', "Can update device attributes")
         )
         get_latest_by = 'created_at'
-        ordering = ['-created_at', '-updated_at']
+        ordering = ['-updated_at', '-created_at']
 
 class Comment(models.Model):
     """A comment for a device. These are added when devices
@@ -72,6 +82,10 @@ class Comment(models.Model):
     user = models.ForeignKey(User, related_name='comments')
     created_at = models.DateTimeField('created at', default=timezone.now())
     updated_at = models.DateTimeField('updated at', default=timezone.now())
+
+    class Meta:
+        get_latest_by = 'updated_at'
+        ordering = ['-updated_at', '-created_at']
 
     def get_cname(self):
         return 'comment'

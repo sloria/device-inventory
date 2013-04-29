@@ -4,6 +4,7 @@ from nose.tools import *
 from inventory.user.tests.factories import ExperimenterFactory, SubjectFactory
 from inventory.devices.tests.factories import DeviceFactory
 from inventory.devices.models import Device
+from django.utils import timezone
 
 from inventory.selenium_tests.utils import SeleniumTestCase, CustomWebDriver
 
@@ -15,7 +16,7 @@ class TestAnExperimenter(SeleniumTestCase):
         # Create a subject
         self.subject = SubjectFactory()
         # create a device
-        self.device = DeviceFactory()
+        self.device = DeviceFactory(status=Device.CHECKED_IN)
         self.driver = CustomWebDriver()
         self._login()
 
@@ -78,13 +79,27 @@ class TestAnExperimenter(SeleniumTestCase):
                     self.driver.body_text())
 
     def test_can_check_in(self):
-        # clicks on the table row for the device
-        self.driver.find_css("tbody tr").click()
+        # There's a checked out device
+        device = DeviceFactory(status=Device.CHECKED_OUT,
+                                created_at=timezone.now(),
+                                updated_at=timezone.now())
+        self.open('/')
+        # clicks on the table row for the checked IN device (second row)
+        self.driver.find_css('tbody tr')[1].click()
+        # clicks check in
+        self.driver.find_css('.btn-checkin').click()
+        # an alert dialog comes up saying that the device is already checked in
+        dialog = self.driver.switch_to_alert()
+        assert_in(u"Device is already checked in", dialog.text)
+        # dismisses the alert
+        dialog.accept()
+        # clicks on the table row for the checked out device (top row)
+        self.driver.find_css("tbody tr")[0].click()
         # clicks check in
         self.driver.find_css('.btn-checkin').click()
         # at the checkin page
         self.driver.click_submit()
-        device = Device.objects.get(pk=self.device.pk)
+        device = Device.objects.get(pk=device.pk)
         assert_equal(device.status, Device.CHECKED_IN)
         assert_in('Successfully checked in', self.driver.body_text())
 

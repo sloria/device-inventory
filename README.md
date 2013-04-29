@@ -20,7 +20,7 @@ A simple Django app for device asset management.
 -  Edit local.py with your local database settings (only if using something other than sqlite).
 - `$ python manage.py syncdb`
 -  Perform any necessary migrations
-    - e.g. `$ python manage.py migrate devices`
+    - e.g. `$ python manage.py migrate`
 - `$ python manage.py runserver`
 
 ## Running tests ##

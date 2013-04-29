@@ -8,7 +8,7 @@
     <dt>Last updated</dt>
     <dd>{{ device.updated_at }}</dd>
     <dt>Status</dt>
-    <dd class='text-info'>{{ device.get_status_display }}</dd>
+    <dd class='text-info'>{{ device.get_verbose_status }}</dd>
     <dt>Condition</dt>
     <dd>{{ device.get_condition_display }}</dd>
     <dt>Description</dt>
@@ -29,8 +29,24 @@
 <ul>
     
 {% for comment in device.comments.all %}
-    <li>{{ comment.text }} ({{ comment.created_at }} by 
-            {{ comment.user.username }})</li>    
+    {# Comment text #}
+    <li data-id="{{ comment.pk }}">{{ comment.text }} 
+        {# Comment info #}
+        <div class="muted">
+            
+        ({{ comment.created_at }} by 
+            <a href="mailto:{{ comment.user.username }}">{{ comment.user.username }}</a>)
+        </div>
+        {% if request.user == comment.user %}
+            <a href="{% url 'devices:edit_comment' device.pk comment.pk %}"><i class="icon-pencil"></i>Edit</a>    
+            <a id="id-comment_delete" href="#"><i class="icon-remove"></i>Delete</a>
+        {% endif %}
+    </li>    
 {% endfor %}
 </ul>
 {% endblock content %}
+{% block scripts %}
+
+<script src="{{ STATIC_URL }}/js/detail.js"></script>
+
+{% endblock scripts %}

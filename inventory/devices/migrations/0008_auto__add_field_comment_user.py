@@ -57,29 +57,29 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         u'devices.comment': {
-            'Meta': {'object_name': 'Comment'},
-            'created_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 25, 0, 0)'}),
+            'Meta': {'ordering': "['-updated_at', '-created_at']", 'object_name': 'Comment'},
+            'created_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 28, 0, 0)'}),
             'device': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'comments'", 'to': u"orm['devices.Device']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'text': ('django.db.models.fields.TextField', [], {'max_length': '1000'}),
-            'updated_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 25, 0, 0)'}),
+            'updated_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 28, 0, 0)'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'comments'", 'to': u"orm['auth.User']"})
         },
         u'devices.device': {
-            'Meta': {'ordering': "['-created_at', '-updated_at']", 'object_name': 'Device'},
+            'Meta': {'ordering': "['-updated_at', '-created_at']", 'object_name': 'Device'},
             'condition': ('django.db.models.fields.CharField', [], {'default': "'EX'", 'max_length': '2'}),
-            'created_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 25, 0, 0)'}),
+            'created_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 28, 0, 0)'}),
             'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'lendee': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['user.Lendee']", 'null': 'True', 'blank': 'True'}),
             'lender': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'lenders'", 'null': 'True', 'to': u"orm['auth.User']"}),
             'make': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'purchased_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 25, 0, 0)'}),
+            'purchased_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 28, 0, 0)'}),
             'responsible_party': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'serial_number': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '200'}),
             'status': ('django.db.models.fields.CharField', [], {'default': "'ST'", 'max_length': '2'}),
-            'updated_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 25, 0, 0)'})
+            'updated_at': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 4, 28, 0, 0)'})
         },
         u'user.lendee': {
             'Meta': {'object_name': 'Lendee'},

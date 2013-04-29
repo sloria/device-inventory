@@ -27,6 +27,7 @@
       "sDom": "<'row-fluid'<'span6'T><'span6'f>r>t<'row-fluid'<'span6'i><'span6'p>>",
       "aoColumnDefs": [],
       "aaSorting": [[updated_at_idx, "desc"]],
+      "iDisplayLength": 50,
       "oTableTools": {
         "sSwfPath": '/static/libs/datatables/extras/TableTools/media/swf/copy_csv_xls.swf',
         'sRowSelect': 'single',
@@ -65,7 +66,7 @@
           }, {
             'sExtends': 'text',
             'sButtonClass': 'btn btn-large btn-info btn-detail',
-            'sButtonText': '<i class="icon-info-sign"></i> View detail',
+            'sButtonText': '<i class="icon-info-sign"></i> View details',
             'fnClick': function(nButton, oConfig, oFlash) {
               var pk, selected;
               selected = oTT.fnGetSelected(oTable);

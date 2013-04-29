@@ -53,4 +53,15 @@ urlpatterns = patterns('',
         DeviceUpdate.as_view(),
         name='update'),
 
+    # ex: /devices/3/comment/4/delete
+    url(r'^(?P<device_id>\d+)/comment/(?P<comment_id>\d+)/delete/$',
+        CommentDelete.as_view(),
+        name='delete_comment'),
+
+        # ex: /devices/3/comment/4/edit
+    url(r'^(?P<device_id>\d+)/comment/(?P<comment_id>\d+)/edit/$',
+        CommentEdit.as_view(),
+        name='edit_comment'),
+
+
 )

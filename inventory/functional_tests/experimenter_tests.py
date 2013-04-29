@@ -2,11 +2,9 @@
 
 from django_webtest import WebTest
 from nose.tools import *
-from inventory.user.tests.factories import (UserFactory, ExperimenterFactory,
-                                             LendeeFactory)
+from inventory.user.tests.factories import UserFactory, ExperimenterFactory
 from inventory.devices.tests.factories import DeviceFactory
-from inventory.devices.models import Device
-from inventory.user.models import Subject, Lendee
+from inventory.devices.models import Comment
 
 class TestAnExperimenter(WebTest):
     def setUp(self):
@@ -69,7 +67,33 @@ class TestAnExperimenter(WebTest):
         # goes to its detail page
         res = self.app.get('/devices/{pk}/'.format(pk=device.pk))
         res.mustcontain(device.name,
-                        device.get_status_display(),
+                        device.get_verbose_status(),
                         device.get_condition_display(),
                         device.serial_number)
-        assert False, 'finish me'
+        assert_in('Check-in Comments', res)
+
+    def test_can_edit_comment(self):
+        # A device is created
+        device = DeviceFactory()
+        # It has a check-in comment
+        comment = Comment.objects.create(text="Just a bigger iPhone", 
+                                        device=device,
+                                        user=self.experimenter.user)
+        # goes to the detail page
+        res = self.app.get('/devices/{pk}/'.format(pk=device.pk), 
+                                            user=self.experimenter.user)
+        # can see the comment
+        assert_in(comment.text, res)
+        # clicks the edit link
+        res = res.click('Edit')
+        # sees a form
+        assert_in('Edit comment', res)
+        form = res.forms['id-edit_comment_form']
+        # changes the comment text
+        form['text'] = 'Or a flat MacBook Air'
+        # submits the form
+        res = form.submit().follow()
+        # back at the detail page
+        assert_equal(res.request.path, '/devices/{pk}/'.format(pk=device.pk))
+        # sees the new comment text
+        assert_in('Or a flat MacBook Air', res)
