@@ -70,7 +70,7 @@
         </td> 
         <td>{{ device.serial_number }}</td>
         <td>{{ device.get_condition_display }}</td>
-        <td>{{ device.updated_at }}</td>
+        <td>{{ device.updated_at|date:"SHORT_DATETIME_FORMAT" }}</td>
       </tr>
     {% endfor %}
     </tbody>
