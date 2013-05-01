@@ -5,7 +5,7 @@ from django_webtest import WebTest
 from nose.tools import *
 from inventory.user.tests.factories import (UserFactory,
                                              LendeeFactory)
-from inventory.devices.tests.factories import DeviceFactory
+from inventory.devices.tests.factories import IpadFactory
 from inventory.devices.models import Device
 from inventory.user.models import Experimenter, Reader
 
@@ -33,13 +33,13 @@ class TestASuperUser(WebTest):
         form['name'] = 'iPad 4, 16GB, WiFi'
         form['description'] = 'This is an Apple product.'
         form['responsible_party'] = 'Freddy Douglass'
-        form['make'] = 'SERW09302'
-        # forgets to put serial number
+        # forgets to put make
         # submits
         res = form.submit()
         # error message is displayed
         assert_in('This field is required', res)
         # enters serial number
+        form['make'] = 'SERW09302 iPad 4'
         form['serial_number'] = '12345X67'
         # submits
         res = form.submit().follow()
@@ -50,12 +50,12 @@ class TestASuperUser(WebTest):
         # the new device's name, status, Lender/Lendee, serial number is displayed
         # headers
         res.mustcontain('Name', 'Lender', 'Lent to', 'Serial number', 'Updated at')
-        res.mustcontain('iPad 4, 16GB, WiFi', 'Storage', '12345X67')
+        res.mustcontain('iPad 4, 16GB, WiFi', 'Checked in - NOT READY', '12345X67')
 
 
     def test_can_see_delete_btn(self):
         # 3 devices are created
-        device1, device2, device3 = DeviceFactory(), DeviceFactory(), DeviceFactory()
+        device1, device2, device3 = IpadFactory(), IpadFactory(), IpadFactory()
         assert_equal(Device.objects.all().count(), 3)
         # user goes to index page
         res = self.app.get('/', user=self.admin).follow()

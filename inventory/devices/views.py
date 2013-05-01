@@ -180,13 +180,13 @@ class DeviceCheckin(FormView):
             device.status = Device.BROKEN
             device.condition = Device.BROKEN
         elif form.cleaned_data['condition'] == 'scratched':
-            device.status = Device.CHECKED_IN
+            device.status = Device.CHECKED_IN_NOT_READY
             device.condition = Device.SCRATCHED
         elif form.cleaned_data['condition'] == 'missing':
             device.status = Device.MISSING
             device.condition = Device.MISSING
         else:
-            device.status = Device.CHECKED_IN
+            device.status = Device.CHECKED_IN_NOT_READY
             device.condition = Device.EXCELLENT
 
         # Set the lendee and lender to None
@@ -210,6 +210,3 @@ class DeviceUpdate(UpdateView):
 
     def get_success_url(self):
         return reverse_lazy('devices:index')
-
-
-

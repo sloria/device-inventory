@@ -2,7 +2,7 @@ from django_webtest import WebTest
 import unittest
 from nose.tools import *
 from inventory.user.tests.factories import ReaderFactory
-from inventory.devices.tests.factories import DeviceFactory
+from inventory.devices.tests.factories import IpadFactory
 
 class TestAReader(WebTest):
     def setUp(self):
@@ -39,7 +39,7 @@ class TestAReader(WebTest):
 
     def test_can_see_devices(self):
         # a device is already created
-        device = DeviceFactory()
+        device = IpadFactory()
         # goes to the device index
         res = self.app.get('/', user=self.reader.user).follow()
         # sees the device name
@@ -47,7 +47,7 @@ class TestAReader(WebTest):
 
     def test_cannot_remove_device(self):
         # a device is created
-        DeviceFactory()
+        IpadFactory()
         # goes to devices page
         res = self.app.get('/', user=self.reader.user).follow()
         # there's no delete button

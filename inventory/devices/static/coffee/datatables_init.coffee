@@ -33,13 +33,13 @@ initialize_table = () ->
                     'sButtonClass': 'btn btn-large btn-primary btn-checkout',
                     'sButtonText': '<i class="icon-signout"></i> Check OUT'
                     'fnClick': (nButton, oConfig, oFlash) ->
-                        if oTT.fnGetSelected(oTable).length == 0
+                        selected = oTT.fnGetSelected(oTable)
+                        if selected.length < 1
                             alert('Please select a device')
                         else
                             ret = prompt("Check OUT - Enter a subject ID or user's e-mail address: ", "")
                             if (ret)
                                 checkout_selected(ret)
-
                 },
                 # Check in
                 {
@@ -49,9 +49,12 @@ initialize_table = () ->
                     "fnClick": (nButton, oConfig, oFlash) -> 
                         selected = oTT.fnGetSelected(oTable)
                         pk = get_selected_id(selected)
-                        if selected < 1
+                        # if user hasn't selected a device
+                        if selected.length < 1
+                            # show an alert
                             alert('Please select a device')
-                        else if get_td("Status", parseInt(pk)) == "Checked in"
+                        # else if the device is already checked in
+                        else if get_td("Status", parseInt(pk)).indexOf("Checked in") isnt -1
                             alert("Device is already checked in")
                         else
                             checkin_selected()
@@ -64,8 +67,11 @@ initialize_table = () ->
                     'fnClick': (nButton, oConfig, oFlash) ->
                         # On click, go to the detail page for the selected device
                         selected = oTT.fnGetSelected(oTable)
-                        pk = get_selected_id(selected)
-                        window.location = "/devices/#{pk}/"
+                        if selected.length < 1
+                            alert('Please select a device')
+                        else
+                            pk = get_selected_id(selected)
+                            window.location = "/devices/#{pk}/"
                 },
                 # Edit
                 {

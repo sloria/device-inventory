@@ -2,7 +2,7 @@
 import time
 from nose.tools import *
 from inventory.user.tests.factories import ExperimenterFactory, SubjectFactory
-from inventory.devices.tests.factories import DeviceFactory
+from inventory.devices.tests.factories import IpadFactory
 from inventory.devices.models import Device
 from django.utils import timezone
 
@@ -16,7 +16,7 @@ class TestAnExperimenter(SeleniumTestCase):
         # Create a subject
         self.subject = SubjectFactory()
         # create a device
-        self.device = DeviceFactory(status=Device.CHECKED_IN)
+        self.device = IpadFactory(status=Device.CHECKED_IN_NOT_READY)
         self.driver = CustomWebDriver()
         self._login()
 
@@ -80,7 +80,7 @@ class TestAnExperimenter(SeleniumTestCase):
 
     def test_can_check_in(self):
         # There's a checked out device
-        device = DeviceFactory(status=Device.CHECKED_OUT,
+        device = IpadFactory(status=Device.CHECKED_OUT,
                                 created_at=timezone.now(),
                                 updated_at=timezone.now())
         self.open('/')
@@ -100,7 +100,7 @@ class TestAnExperimenter(SeleniumTestCase):
         # at the checkin page
         self.driver.click_submit()
         device = Device.objects.get(pk=device.pk)
-        assert_equal(device.status, Device.CHECKED_IN)
+        assert_equal(device.status, Device.CHECKED_IN_NOT_READY)
         assert_in('Successfully checked in', self.driver.body_text())
 
     def test_can_checkout_device_to_subject(self):

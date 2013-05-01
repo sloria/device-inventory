@@ -37,8 +37,9 @@
             'sButtonClass': 'btn btn-large btn-primary btn-checkout',
             'sButtonText': '<i class="icon-signout"></i> Check OUT',
             'fnClick': function(nButton, oConfig, oFlash) {
-              var ret;
-              if (oTT.fnGetSelected(oTable).length === 0) {
+              var ret, selected;
+              selected = oTT.fnGetSelected(oTable);
+              if (selected.length < 1) {
                 return alert('Please select a device');
               } else {
                 ret = prompt("Check OUT - Enter a subject ID or user's e-mail address: ", "");
@@ -55,9 +56,9 @@
               var pk, selected;
               selected = oTT.fnGetSelected(oTable);
               pk = get_selected_id(selected);
-              if (selected < 1) {
+              if (selected.length < 1) {
                 return alert('Please select a device');
-              } else if (get_td("Status", parseInt(pk)) === "Checked in") {
+              } else if (get_td("Status", parseInt(pk)).indexOf("Checked in") !== -1) {
                 return alert("Device is already checked in");
               } else {
                 return checkin_selected();
@@ -70,8 +71,12 @@
             'fnClick': function(nButton, oConfig, oFlash) {
               var pk, selected;
               selected = oTT.fnGetSelected(oTable);
-              pk = get_selected_id(selected);
-              return window.location = "/devices/" + pk + "/";
+              if (selected.length < 1) {
+                return alert('Please select a device');
+              } else {
+                pk = get_selected_id(selected);
+                return window.location = "/devices/" + pk + "/";
+              }
             }
           }, {
             'sExtends': 'text',

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-<h1 class="page-title center">{{ device.name }} ({{ device.serial_number }})</h1>
+<h1 class="page-title center">{{ device.name }}</h1>
+<h2 class="center text-info">{{ device.get_verbose_status }}</h2>
 
 <dl id="id-device_info" class="dl-horizontal">
     <dt>Name</dt>

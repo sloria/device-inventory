@@ -10,11 +10,13 @@ class Device(models.Model):
     '''A device.
     '''
     # These constants define choices for a device's status
-    CHECKED_IN = 'CI'
+    CHECKED_IN_READY = 'IR'
+    CHECKED_IN_NOT_READY = 'IN'
     CHECKED_OUT = 'CO'
     STORAGE = 'ST'
     BROKEN = 'BR'
     MISSING = 'MI'
+    SENT_FOR_REPAIR = 'RE'
 
     # Other constants for condition
     EXCELLENT = 'EX'
@@ -22,11 +24,13 @@ class Device(models.Model):
 
     # Define possible choices for Status field
     STATUS_CHOICES = (
-        (CHECKED_IN, 'Checked in'),
+        (CHECKED_IN_READY, 'Checked in - READY'),
+        (CHECKED_IN_NOT_READY, 'Checked in - NOT READY'),
         (CHECKED_OUT, 'Checked out'),
         (STORAGE, 'Storage'),
         (BROKEN, 'Broken'),
         (MISSING, 'Missing'),
+        (SENT_FOR_REPAIR, 'Sent for repair')
     )
 
     # Define possible choices for condition field
@@ -40,20 +44,28 @@ class Device(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)
     responsible_party = models.CharField(max_length=100, null=True, blank=True)
-    make = models.CharField(max_length=200)
-    serial_number = models.CharField(max_length=200, unique=True)
-    status = models.CharField(max_length=2, choices=STATUS_CHOICES, default=STORAGE)
-    condition = models.CharField(max_length=2, choices=CONDITION_CHOICES, default=EXCELLENT)
+    make = models.CharField(max_length=200, null=False)
+    serial_number = models.CharField(max_length=200, 
+                                    null=True, blank=True, unique=False)
+    status = models.CharField(max_length=2, 
+                            choices=STATUS_CHOICES, default=CHECKED_IN_NOT_READY)
+    condition = models.CharField(max_length=2, 
+                            choices=CONDITION_CHOICES, default=EXCELLENT)
     purchased_at = models.DateTimeField('Date purchased', default=timezone.now())
     created_at = models.DateTimeField('created at', default=timezone.now())
     updated_at = models.DateTimeField('updated at', default=timezone.now())
     lendee = models.ForeignKey(Lendee, null=True, blank=True, unique=False)
-    lender = models.ForeignKey(User, null=True, blank=True, unique=False, related_name='lenders')
+    lender = models.ForeignKey(User, 
+                            null=True, blank=True, unique=False, 
+                            related_name='lenders')
 
     def __unicode__(self):
         return unicode("name: {0}, status: {1}".format(self.name, self.status))
 
     def get_verbose_status(self):
+        '''Return a string with the status and the lendee, if
+        the device is checked out.
+        '''
         if self.status == Device.CHECKED_OUT:
             if self.lendee.user:
                 return u'Checked out to {lendee}'\
@@ -63,6 +75,7 @@ class Device(models.Model):
                             .format(id=self.lendee.subject.subject_id)
         else:
             return self.get_status_display()
+
     def get_cname(self):
         return 'device'
         

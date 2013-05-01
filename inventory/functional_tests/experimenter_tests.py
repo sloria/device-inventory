@@ -3,7 +3,7 @@
 from django_webtest import WebTest
 from nose.tools import *
 from inventory.user.tests.factories import UserFactory, ExperimenterFactory
-from inventory.devices.tests.factories import DeviceFactory
+from inventory.devices.tests.factories import IpadFactory
 from inventory.devices.models import Comment
 
 class TestAnExperimenter(WebTest):
@@ -39,7 +39,7 @@ class TestAnExperimenter(WebTest):
 
     def test_cannot_remove_device(self):
         # a device is created
-        DeviceFactory()
+        IpadFactory()
         # goes to devices page
         res = self.app.get('/', user=self.experimenter.user).follow()
         # cannot see delete device
@@ -47,7 +47,7 @@ class TestAnExperimenter(WebTest):
 
     def test_can_see_devices(self):
         # a device is already created
-        device = DeviceFactory()
+        device = IpadFactory()
         # goes to the device index
         res = self.app.get('/', user=self.experimenter.user).follow()
         # sees the device name
@@ -63,7 +63,7 @@ class TestAnExperimenter(WebTest):
 
     def test_can_see_device_detail(self):
         # a device is created
-        device = DeviceFactory()
+        device = IpadFactory()
         # goes to its detail page
         res = self.app.get('/devices/{pk}/'.format(pk=device.pk))
         res.mustcontain(device.name,
@@ -74,7 +74,7 @@ class TestAnExperimenter(WebTest):
 
     def test_can_edit_comment(self):
         # A device is created
-        device = DeviceFactory()
+        device = IpadFactory()
         # It has a check-in comment
         comment = Comment.objects.create(text="Just a bigger iPhone", 
                                         device=device,
