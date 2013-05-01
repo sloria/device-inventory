@@ -1,4 +1,6 @@
 """Devices views."""
+
+import re
 from django.core.urlresolvers import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, HttpResponseRedirect
@@ -15,6 +17,8 @@ import verhoeff
 from inventory.devices.models import Device, Comment
 from inventory.user.models import Subject, Lendee
 from inventory.devices.forms import DeviceForm, CheckinForm, CommentEditForm
+
+EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
 class DevicesListView(ListView):
     '''Index view for devices.'''
@@ -103,40 +107,45 @@ class DeviceCheckout(View):
     def post(self, request, pk):
         '''Checks out a device to either a user or a subject.
         '''
-        # get the lendee id (a string that's either a subject ID or
-        # an user's name (or maybe email address?)
-        lendee = request.POST['lendee']
-        data = {}
-        try:
-            # if it's a valid subject id
-            subject_id = int(lendee)
-            if verhoeff.validate(subject_id):
-                # get or create the subject
-                subject, created = Subject.objects.get_or_create(subject_id=subject_id)
-                if created:
-                    data['created_subject'] = True
-                else:
-                    data['created_subject'] = False
-                # get or create the lendee with the subject as the lendee
-                lendee_obj, created = Lendee.objects.get_or_create(subject=subject)
-                data['name'] = "Subject {id}".format(id=subject_id)
-                data['success'] = True
-            else:
-                data['error'] = "Invalid subject ID. Please try again."
-        # else it's a user
-        except ValueError:
+        # get the post data (a string that's either a subject ID or e-mail address)
+        lendee_str = request.POST['lendee']
+        response_data = {}
+
+        # If it's an email (a user)
+        if EMAIL_REGEX.match(lendee_str):
             try:
                 # get the user
-                user = User.objects.get(username=lendee)
+                user = User.objects.get(username=lendee_str)
                 # get or create the lendee with the user as the user
-                data['name'] = user.get_full_name()
+                response_data['name'] = user.get_full_name()
                 Lendee.objects.get_or_create(user=user)
-                data['success'] = True
+                response_data['success'] = True
             except ObjectDoesNotExist:
-                data['error'] = 'No user found with e-mail address {email}'\
-                                                        .format(email=lendee)
-            # return json response
-        json_data = json.dumps(data)
+                response_data['error'] = 'No user found with e-mail address {email}'\
+                                                    .format(email=lendee_str)
+        # Else it's a subject id
+        else:
+            # remove dashes and cast as int
+            subject_id = int(lendee_str.replace('-', '')) 
+            # validate the id using the Verhoeff algorithm
+            if verhoeff.validate(subject_id):
+                # get or create the subject
+                subject, created = Subject.objects.get_or_create(
+                                                    subject_id=subject_id)
+                if created:
+                    response_data['created_subject'] = True
+                else:
+                    response_data['created_subject'] = False
+                # get or create the lendee with the subject as the lendee
+                lendee_obj, created = Lendee.objects.get_or_create(
+                                                        subject=subject)
+                response_data['name'] = "Subject {id}".format(id=subject_id)
+                response_data['success'] = True
+            else:
+                response_data['error'] = "Invalid subject ID. Please try again."
+
+        # return json response
+        json_data = json.dumps(response_data)
         return HttpResponse(json_data, mimetype='application/json')
 
 class DeviceCheckoutConfirm(View):
@@ -144,16 +153,17 @@ class DeviceCheckoutConfirm(View):
     Accepts and AJAX request and updates a device record.
     '''
     def post(self, request, pk):
-        data = {}
-        # Lendee email has already been validate in DeviceCheckout
-        lendee = request.POST['lendee']
-        try:
-            # if lendee is a subject
-            subject_id = int(lendee)
+        response_data = {}
+        # Lendee email has already been validated in DeviceCheckout
+        lendee_str = request.POST['lendee']
+        # If lendee is a user
+        if EMAIL_REGEX.match(lendee_str):
+            lendee_obj = Lendee.objects.get(user__username=lendee_str)
+        # if lendee is a subject
+        else:
+            # remove dashes and cast as int
+            subject_id = int(lendee_str.replace('-', ''))
             lendee_obj = Lendee.objects.get(subject__subject_id=subject_id)
-        except ValueError:
-            # if lendee is a user
-            lendee_obj = Lendee.objects.get(user__username=lendee)
         # Update the device's lendee, lender, status, and updated at time
         device = Device.objects.get(pk=pk)
         device.lendee = lendee_obj
@@ -161,8 +171,8 @@ class DeviceCheckoutConfirm(View):
         device.status = Device.CHECKED_OUT
         device.updated_at = timezone.now()
         device.save()
-        data['success'] = True
-        json_data = json.dumps(data)
+        response_data['success'] = True
+        json_data = json.dumps(response_data)
         messages.success(request, 'Successfully checked out device')
         return HttpResponse(json_data, mimetype='application/json')
 

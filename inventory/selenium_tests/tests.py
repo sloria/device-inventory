@@ -124,7 +124,7 @@ class TestAnExperimenter(SeleniumTestCase):
         self.driver.find_css('.btn-checkout').click()
         dialog = self.driver.switch_to_alert()
         # enters a valid subject ID
-        dialog.send_keys("123451")
+        dialog.send_keys("123-45-1")
         dialog.accept()
         # a confirm msg comes up
         dialog = self.driver.switch_to_alert()
