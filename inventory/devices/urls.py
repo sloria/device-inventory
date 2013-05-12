@@ -8,12 +8,17 @@ from inventory.devices.views import *
 urlpatterns = patterns('',
     # ex: /devices
     url(r'^$', 
-        DevicesListView.as_view(),
+        IpadsListView.as_view(),
         name='index'),
+
+    # ex: /devices/ipads/
+    url(r'^ipads/$', 
+        IpadsListView.as_view(),
+        name='ipads'),
 
     # ex: /devices/3/
     url(r'^(?P<pk>\d+)/$',
-        DeviceDetail.as_view(),
+        IpadDetail.as_view(),
         name='detail'
         ),
 
@@ -44,13 +49,13 @@ urlpatterns = patterns('',
         name='checkout_confirm'),
 
     # ex: /devices/3/checkin
-    url(r'^(?P<pk>\d+)/checkin/$',
+    url(r'^(?P<device_type>\w+)/(?P<pk>\d+)/checkin/$',
         DeviceCheckin.as_view(),
         name='checkin'),
 
-    # ex: /devices/3/edit
-    url(r'^(?P<pk>\d+)/edit/$',
-        DeviceUpdate.as_view(),
+    # ex: /devices/ipads/3/edit
+    url(r'^(?P<device_type>\w+)/(?P<pk>\d+)/edit/$',
+        IpadUpdate.as_view(),
         name='update'),
 
     # ex: /devices/3/comment/4/delete

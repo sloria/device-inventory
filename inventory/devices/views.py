@@ -8,51 +8,80 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
-from django.views.generic import (View, ListView, DetailView,
+from django.views.generic import (View, ListView, DetailView, TemplateView,
     CreateView, UpdateView, FormView)
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 import verhoeff
 
-from inventory.devices.models import Device, Comment
+from inventory.devices.models import *
 from inventory.user.models import Subject, Lendee
-from inventory.devices.forms import DeviceForm, CheckinForm, CommentEditForm
+from inventory.devices.forms import (DeviceForm, CheckinForm, 
+    CommentEditForm, IpadEditForm)
 
 EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
-class DevicesListView(ListView):
+class IpadsListView(TemplateView):
     '''Index view for devices.'''
-    model = Device
     template_name = 'devices/index.html'
-    context_object_name = 'all_devices'
 
     def get(self, request):
-        '''Get request takes user to index view if authenticated.
-        Otherwise, redirect back to the home page.'''
         if request.user.is_authenticated():
-            return super(DevicesListView, self).get(self, request)
+            return super(IpadsListView, self).get(request)
         else:
             return redirect('home')
 
     def get_context_data(self, **kwargs):
-        context = super(DevicesListView, self).get_context_data(**kwargs)
-        context['contenttype_id'] = ContentType.objects.get_for_model(Device).pk
+        context = super(IpadsListView, self).get_context_data(**kwargs)
+        context['contenttype_id'] = ContentType.objects.get_for_model(Ipad).pk
+        context['all_devices'] = Ipad.objects.all()
         return context
 
-class DeviceDetail(DetailView):
-    """Detail view for devices.
+class IpadDetail(DetailView):
+    """Detail view for iPads.
     """
-    model = Device
+    model = Ipad
     context_object_name = 'device'
     template_name = 'devices/detail.html'
 
-
-class DeviceAdd(CreateView):
+class DeviceAdd(FormView):
     '''View for adding a device.
     '''
     form_class = DeviceForm
     template_name = 'devices/add.html'
     success_url = reverse_lazy('devices:index')
+
+    def _add_device_type(self, device_class, form):
+        '''Saves a new device record of a given class (e.g. Ipad)
+        with the attributes submitted in a form.
+        '''
+        form_data = form.cleaned_data
+        device = device_class()
+        if form_data['description']:
+            device.description = form_data['description']
+        if form_data['responsible_party']:
+            device.responsible_party = form_data['responsible_party']
+        device.make = form_data['make']
+        if form_data['serial_number']:
+            device.serial_number = form_data['serial_number']
+        device.purchased_at = form_data['purchased_at']
+        device.save()
+
+
+    def form_valid(self, form):
+        """Create a new device of the selected type.
+        """
+        form_data = form.cleaned_data
+        device_type = form_data['device_type']
+        if device_type == 'ipad':
+            self._add_device_type(Ipad, form)
+        elif device_type == 'headphones':
+            self._add_device_type(Headphones, form)
+        elif device_type == 'adapter':
+            self._add_device_type(Adapter, form)
+        else:
+            self._add_device_type(Case, form)
+        return super(DeviceAdd, self).form_valid(form)
 
     def get(self, request):
         '''Get request renders form if user has permission to add
@@ -81,7 +110,7 @@ class CommentEdit(UpdateView):
 
     def form_valid(self, form):
         # Update the devices updated_at attribute before saving
-        Device.objects.filter(pk=int(self.kwargs['device_id']))\
+        Ipad.objects.filter(pk=int(self.kwargs['device_id']))\
                                 .update(updated_at=timezone.now())
         return super(CommentEdit, self).form_valid(form)
 
@@ -152,6 +181,28 @@ class DeviceCheckoutConfirm(View):
     '''View for confirming the checkout of a device.
     Accepts and AJAX request and updates a device record.
     '''
+    def _checkout_device(self, pk, lendee, lender):
+        '''Checks out the selected device.
+        '''
+        # Get the correct device type from POST data
+        device_type = self.request.POST['device_type']
+        device_class = None
+        if device_type == 'ipad':
+            device_class = Ipad
+        elif device_type == 'headphones':
+            device_class = Headphones
+        elif device_type == 'adapter':
+            device_class = Adapter
+        else:
+            device_class = Case
+        # Initialize the new device object
+        device = device_class.objects.get(pk=pk)
+        device.lendee = lendee
+        device.lender = lender
+        device.status = Device.CHECKED_OUT
+        device.save()
+        return device
+
     def post(self, request, pk):
         response_data = {}
         # Lendee email has already been validated in DeviceCheckout
@@ -165,12 +216,7 @@ class DeviceCheckoutConfirm(View):
             subject_id = int(lendee_str.replace('-', ''))
             lendee_obj = Lendee.objects.get(subject__subject_id=subject_id)
         # Update the device's lendee, lender, status, and updated at time
-        device = Device.objects.get(pk=pk)
-        device.lendee = lendee_obj
-        device.lender = request.user
-        device.status = Device.CHECKED_OUT
-        device.updated_at = timezone.now()
-        device.save()
+        self._checkout_device(pk, lendee_obj, request.user)
         response_data['success'] = True
         json_data = json.dumps(response_data)
         messages.success(request, 'Successfully checked out device')
@@ -182,9 +228,28 @@ class DeviceCheckin(FormView):
     template_name = 'devices/checkin.html'
     success_url = reverse_lazy('devices:index')
 
+    def _get_device(self, pk):
+        '''Gets the device of the correct type and pk from the POST data.
+        Returns the device object.
+        '''
+        # get the correct device type from POST data
+        device_type = self.kwargs['device_type']
+        device_class = None
+        if device_type == 'ipad':
+            device_class = Ipad
+        elif device_type == 'headphones':
+            device_class = Headphones
+        elif device_type == 'adapter':
+            device_class = Adapter
+        else:
+            device_class = Case
+        # Initialize the new device object
+        device = device_class.objects.get(pk=pk)
+        return device
+
     def form_valid(self, form):
         # Get the device
-        device = Device.objects.get(pk=self.kwargs['pk'])
+        device = self._get_device(self.kwargs['pk'])
         # Change device status
         if form.cleaned_data['condition'] == 'broken':
             device.status = Device.BROKEN
@@ -202,7 +267,6 @@ class DeviceCheckin(FormView):
         # Set the lendee and lender to None
         device.lendee = None
         device.lender = None
-        device.updated_at = timezone.now()
         device.save()
         # save the comment if it exists
         if form.cleaned_data['comment']:
@@ -213,10 +277,11 @@ class DeviceCheckin(FormView):
         # Change device condition
         return super(DeviceCheckin, self).form_valid(form)
 
-class DeviceUpdate(UpdateView):
-    model = Device
+class IpadUpdate(UpdateView):
+    model = Ipad
+    form_class = IpadEditForm
     template_name = 'devices/edit.html'
+    success_url = reverse_lazy('devices:ipads')
     context_object_name = 'device'
 
-    def get_success_url(self):
-        return reverse_lazy('devices:index')
+

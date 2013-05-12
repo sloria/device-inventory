@@ -6,7 +6,7 @@ from nose.tools import *
 from inventory.user.tests.factories import (UserFactory,
                                              LendeeFactory)
 from inventory.devices.tests.factories import IpadFactory
-from inventory.devices.models import Device
+from inventory.devices.models import *
 from inventory.user.models import Experimenter, Reader
 
 class TestASuperUser(WebTest):
@@ -18,7 +18,7 @@ class TestASuperUser(WebTest):
     def tearDown(self):
         pass
 
-    def test_can_add_device(self):
+    def test_can_add_ipad(self):
         # Goes to root (already logged in)
         res = self.app.get('/', user=self.admin).follow()
         assert_equal(res.request.path, '/devices/')
@@ -30,9 +30,8 @@ class TestASuperUser(WebTest):
 
         # Fills in form
         form = res.forms['device_form']
-        form['name'] = 'iPad 4, 16GB, WiFi'
-        form['description'] = 'This is an Apple product.'
-        form['responsible_party'] = 'Freddy Douglass'
+        form.set('device_type', 'ipad')  # selects iPad
+        form['description'] = '16GB, white'
         # forgets to put make
         # submits
         res = form.submit()
@@ -40,23 +39,70 @@ class TestASuperUser(WebTest):
         assert_in('This field is required', res)
         # enters serial number
         form['make'] = 'SERW09302 iPad 4'
-        form['serial_number'] = '12345X67'
         # submits
         res = form.submit().follow()
         # device is saved to database
-        assert_equal(Device.objects.all().count(), 1)
+        assert_equal(Ipad.objects.all().count(), 1)
+        assert_equal(Ipad.objects.latest().description,
+                    '16GB, white')
         # redirected to device index
         assert_equal(res.request.path, '/devices/')
         # the new device's name, status, Lender/Lendee, serial number is displayed
         # headers
         res.mustcontain('Name', 'Lender', 'Lent to', 'Serial number', 'Updated at')
-        res.mustcontain('iPad 4, 16GB, WiFi', 'Checked in - NOT READY', '12345X67')
+        res.mustcontain('iPad', 'Checked in - NOT READY')
 
+    def test_can_add_headphones(self):
+        # goes to add device page
+        res = self.app.get('/devices/add/', user=self.admin)
+        form = res.forms['device_form']
+        form.set('device_type', 'headphones')  # selects headphones
+        form['description'] = 'iPad headphones'
+        form['make'] = 'iPad headphones'
+        # submits
+        res = form.submit().follow()
+        # saved to db
+        headphones = Headphones.objects.latest()
+        assert_equal(headphones.name, 'Headphones')
+        # redirected to device index
+        assert_equal(res.request.path, '/devices/')
+
+    def test_can_add_adapter(self):
+        # goes to add device page
+        res = self.app.get('/devices/add/', user=self.admin)
+        # fills out the device form
+        form = res.forms['device_form']
+        form.set('device_type', 'adapter')  # selects adapter
+        form['description'] = 'wall charger/adapter for iPad'
+        form['make'] = "Apple wall charger adapter"
+        # submits
+        res = form.submit().follow()
+        # saved to db
+        adapter = Adapter.objects.latest()
+        assert_in('adapter', adapter.make.lower())
+        # redirected to device indes
+        assert_equal(res.request.path, '/devices/')
+
+    def test_can_add_case(self):
+        # goes to add device page
+        res = self.app.get('/devices/add/', user=self.admin)
+        # fills out the device form
+        form = res.forms['device_form']
+        form.set('device_type', 'case')  # selects adapter
+        form['description'] = 'case for iPad (blue)'
+        form['make'] = "iPad Smartcase"
+        # submits
+        res = form.submit().follow()
+        # saved to db
+        case = Case.objects.latest()
+        assert_in('case', case.make.lower())
+        # redirected to device indes
+        assert_equal(res.request.path, '/devices/')
 
     def test_can_see_delete_btn(self):
         # 3 devices are created
         device1, device2, device3 = IpadFactory(), IpadFactory(), IpadFactory()
-        assert_equal(Device.objects.all().count(), 3)
+        assert_equal(Ipad.objects.all().count(), 3)
         # user goes to index page
         res = self.app.get('/', user=self.admin).follow()
         # devices are listed
@@ -64,7 +110,6 @@ class TestASuperUser(WebTest):
         assert_in(device2.serial_number, res)
         # there is a delete button
         assert_in('Delete', res)
-        # selects first two devices
 
     def test_can_create_experimenter(self):
         # logs in 

@@ -8,7 +8,7 @@
 
 {# Only show device actions for admins and experimenters #}
 {% if perms.user.can_update_device_attributes %}
-  <h2>Device actions</h2>
+  <h2>iPads</h2>
 {% endif %}
   
   {% if all_devices.count %}  
@@ -24,10 +24,12 @@
     </thead>
     <tbody>
     {% for device in all_devices %}
-      <tr data-id="{{ device.pk }}">   
+      <tr data-id="{{ device.pk }}" data-type="{{ device.get_cname }}">   
         {# <td><input type="checkbox" value="{{ device.pk }}" name='device_select' id="select_device{{ device.pk }}"></td> #}
         <td>{{ device.name }}</td>
-        <td>{{ device.get_status_display }}</td>
+        <td style="color:{{ device.get_status_color }}">
+          {{ device.get_status_display }}
+        </td>
         <td>
           {% if device.lendee.user %}
           {{ device.lendee.get_last_name_first }}
@@ -53,7 +55,7 @@
     </tbody>
   </table>
 {% else %}
-<h2>No devices</h2>
+<h3>No devices</h3>
 {% endif %}
 {% endif %}
   {% if user.is_superuser %}

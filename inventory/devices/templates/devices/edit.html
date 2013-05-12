@@ -1,10 +1,5 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div class="form-widget">
-<legend>Edit device</legend>
-<form action="{% url 'devices:update' device.pk %}" method="post">{% csrf_token %}
-{{ form.as_p }}
-<input type="submit" class="btn btn-primary btn-submit">
-</div>
+{% crispy form %}
 {% endblock content %}

@@ -4,7 +4,7 @@ from django_webtest import WebTest
 from nose.tools import *
 from inventory.user.tests.factories import UserFactory, ExperimenterFactory
 from inventory.devices.tests.factories import IpadFactory
-from inventory.devices.models import Comment
+from inventory.devices.models import Device, Ipad, Comment
 
 class TestAnExperimenter(WebTest):
     def setUp(self):
@@ -71,6 +71,23 @@ class TestAnExperimenter(WebTest):
                         device.get_condition_display(),
                         device.serial_number)
         assert_in('Check-in Comments', res)
+
+    def test_can_edit_ipad(self):
+        # an ipad is created
+        device = IpadFactory(name="iPad", 
+                            make="iPad 4",
+                            status=Device.CHECKED_IN_NOT_READY)
+        # goes to edit page
+        res = self.app.get('/devices/ipad/{pk}/edit/'.format(pk=device.pk))
+        # there's a form for editing
+        form = res.forms['id-edit_form']
+        form['status'] = Device.CHECKED_IN_READY
+        # submits
+        res = form.submit().follow()
+        assert_equal(res.request.path, '/devices/ipads/')
+        # device is updated in db
+        device = Ipad.objects.get(pk=device.pk)
+        assert_equal(device.status, Device.CHECKED_IN_READY)
 
     def test_can_edit_comment(self):
         # A device is created

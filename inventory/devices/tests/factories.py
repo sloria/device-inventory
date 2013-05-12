@@ -1,8 +1,8 @@
 from factory import Factory, Sequence
-from inventory.devices.models import Device
+from inventory.devices.models import *
 
 class IpadFactory(Factory):
-    FACTORY_FOR = Device
+    FACTORY_FOR = Ipad
 
     name = "iPad"
     description = 'iPad 4, 16GB, WiFi'
@@ -11,23 +11,22 @@ class IpadFactory(Factory):
     serial_number = Sequence(lambda n: 'DMRJM1XTF182{0}'.format(n))
 
 class HeadphonesFactory(Factory):
-    FACTORY_FOR = Device
-    name = "Headphones"
+    FACTORY_FOR = Headphones
     description = 'white headphones'
-    status = Device.CHECKED_IN_NOT_READY
+    status = Device.CHECKED_IN
     make = "iPad headphones"
 
 class AdapterFactory(Factory):
-    FACTORY_FOR = Device
+    FACTORY_FOR = Adapter
     name = 'Power adapter'
     description = "wall charger adapter"
     make = "iPad wall charger adapter"
 
 class CaseFactory(Factory):
-    FACTORY_FOR = Device
+    FACTORY_FOR = Case
     name = 'iPad case'
     description = "Case for the iPad, blue"
-    make = "iPad case"
+    make = "iPad Smartcase"
 
 def create_device_factories():
     (ipad, headphones, 

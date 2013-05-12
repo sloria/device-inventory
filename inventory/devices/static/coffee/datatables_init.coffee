@@ -85,7 +85,8 @@ initialize_table = () ->
                             else
                                 # redirect to device edit page
                                 pk = get_selected_id(selected)
-                                window.location = "/devices/#{pk}/edit/"
+                                device_class = get_selected_class(selected)
+                                window.location = "/devices/#{device_class}/#{pk}/edit/"
                 },
                 # # Export csv
                 # {
@@ -118,7 +119,8 @@ checkout_selected = (lendee) ->
                         url: "/devices/#{pk}/checkout/confirm",
                         type: 'POST',
                         data: {
-                            'lendee': lendee
+                            'lendee': lendee,
+                            'device_type': get_selected_class(selected)
                         },
                         success: (data) ->
                             # Refresh the page
@@ -129,7 +131,8 @@ checkout_selected = (lendee) ->
 checkin_selected = () ->
     selected = oTT.fnGetSelected(oTable)
     pk = get_selected_id(selected)
-    window.location = "/devices/#{pk}/checkin"
+    device_type = get_selected_class(selected)
+    window.location = "/devices/#{device_type}/#{pk}/checkin"
 
 
 # Add click handler for device delete button
@@ -145,7 +148,11 @@ WARNING: This action is irreversible.")
         if confirmed
             $.ajax(
                 url: "/devices/#{pk}/delete/",
-                type: "POST"
+                type: "POST",
+                data: {
+                    'pk': pk,
+                    'device_type': get_selected_class(selected)
+                    }
                 success: (data) ->
                     # Refresh the page
                     window.location = "/devices/"
@@ -186,6 +193,12 @@ get_selected_id = (selected) ->
     Returns the id of a selected device as an integer.
     ###
     $(selected).data('id')
+
+get_selected_class = (selected) ->
+    ###
+    Returns the device class of a selected device as an integer.
+    ###
+    $(selected).data('type')
 
 get_selected_ids = (selected) ->
     ###

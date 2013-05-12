@@ -1,15 +1,35 @@
+from django.utils import timezone
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
-from inventory.devices.models import Device, Comment
+from inventory.devices.models import *
 
-class DeviceForm(forms.ModelForm):
+class DeviceForm(forms.Form):
     '''Form for creating a new device.
     '''
-    class Meta:
-        model = Device
-        fields = ('name', 'description', 'responsible_party', 'make', 'serial_number',
-                    'purchased_at')
+    DEVICE_TYPES = (
+                        ('ipad', 'iPad'),
+                        ('headphones', 'Headphones'),
+                        ('adapter', 'Power adapter'),
+                        ('case', 'iPad case'),
+                    )
+    device_type = forms.ChoiceField(label='Device type: ', widget=forms.Select,
+                                    choices=DEVICE_TYPES,
+                                    required=True)
+
+    description = forms.CharField(label='Description: ', widget=forms.Textarea,
+                                    max_length=1000, help_text='Optional',
+                                    required=False)
+
+    responsible_party = forms.CharField(label='Responsible party: ',
+                                    help_text='Optional',
+                                    required=False)
+    make = forms.CharField(label='Make: ')
+    purchased_at = forms.DateField(label="Purchased at: ",
+                                    initial=timezone.now(),
+                                    required=False, help_text='Optional')
+    serial_number = forms.CharField(label="Serial number: ",
+                                    required=False, help_text='Optional')
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
@@ -19,7 +39,7 @@ class DeviceForm(forms.ModelForm):
         self.helper.layout = Layout(
             Fieldset(
                     'Add device',
-                    'name',
+                    'device_type',
                     'description',
                     'responsible_party',
                     'make',
@@ -30,7 +50,7 @@ class DeviceForm(forms.ModelForm):
                     Submit('submit', 'Submit')
                 )
         )
-        super(DeviceForm, self).__init__(*args, **kwargs)
+        return super(DeviceForm, self).__init__(*args, **kwargs)
 
 class CheckinForm(forms.Form):
     '''Form for checking in a device.
@@ -43,6 +63,8 @@ class CheckinForm(forms.Form):
                     ('missing', 'Missing')
                 )
 
+
+
     condition = forms.ChoiceField(label='Condition: ', widget=forms.Select,
                                     choices=CONDITIONS,
                                     required=True)
@@ -52,7 +74,7 @@ class CheckinForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
-        self.helper.form_id = 'checkin_form'
+        self.helper.form_id = 'id-checkin_form'
         self.helper.form_class = "form-widget"
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
@@ -65,32 +87,43 @@ class CheckinForm(forms.Form):
                 Submit('submit', "Submit")
             )
         )
-        super(CheckinForm, self).__init__(*args, **kwargs)
+        return super(CheckinForm, self).__init__(*args, **kwargs)
 
-class DeviceEditForm(forms.Form):
+class IpadEditForm(forms.ModelForm):
     '''Form for updating a device's attributes.
     '''
+    class Meta:
+        model = Ipad
 
-    def __init__(self, instance, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
-        self.helper.form_id = 'edit_form'
+        self.helper.form_id = 'id-edit_form'
         self.helper.form_class = "form-widget"
         self.helper.form_method = 'post'
         self.helper.layout = Layout(
             Fieldset(
                 "Edit device",
+                'status',
+                'name',
+                'description',
+                'make',
+                'condition',
+                'serial_number',
+                'purchased_at',
+                'created_at',
+                'updated_at'
             ),
             ButtonHolder(
                 Submit('submit', "Submit")
             )
         )
-        super(DeviceEditForm, self).__init__(instance, *args, **kwargs)
+        return super(IpadEditForm, self).__init__(*args, **kwargs)
 
 class CommentEditForm(forms.ModelForm):
     '''Form for updating a comment.
     '''
-
-    text = forms.CharField(label='Comment: ', widget=forms.Textarea, max_length=500, required=True)
+    text = forms.CharField(label='Comment: ', widget=forms.Textarea,
+                             max_length=500, required=True)
     class Meta:
         model = Comment 
         fields = ('text',)
@@ -109,4 +142,4 @@ class CommentEditForm(forms.ModelForm):
                 Submit('submit', "Submit")
             )
         )
-        super(CommentEditForm, self).__init__(*args, **kwargs)
+        return super(CommentEditForm, self).__init__(*args, **kwargs)

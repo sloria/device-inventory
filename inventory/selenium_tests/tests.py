@@ -1,9 +1,10 @@
 '''Functional tests using Selenium'''
 import time
+from unittest import skip
 from nose.tools import *
 from inventory.user.tests.factories import ExperimenterFactory, SubjectFactory
 from inventory.devices.tests.factories import IpadFactory
-from inventory.devices.models import Device
+from inventory.devices.models import *
 from django.utils import timezone
 
 from inventory.selenium_tests.utils import SeleniumTestCase, CustomWebDriver
@@ -69,7 +70,7 @@ class TestAnExperimenter(SeleniumTestCase):
         dialog.accept()  # click accept
         time.sleep(2)
         # db record is updated
-        device = Device.objects.get(pk=self.device.pk)
+        device = Ipad.objects.get(pk=self.device.pk)
         assert_equal(device.status, Device.CHECKED_OUT)
         assert_equal(device.lendee.user.username,
                     self.experimenter.user.username)
@@ -99,7 +100,8 @@ class TestAnExperimenter(SeleniumTestCase):
         self.driver.find_css('.btn-checkin').click()
         # at the checkin page
         self.driver.click_submit()
-        device = Device.objects.get(pk=device.pk)
+        # saved to db
+        device = Ipad.objects.get(pk=device.pk)
         assert_equal(device.status, Device.CHECKED_IN_NOT_READY)
         assert_in('Successfully checked in', self.driver.body_text())
 
@@ -134,7 +136,7 @@ class TestAnExperimenter(SeleniumTestCase):
         dialog.accept()
         time.sleep(2)
         # db record is updated
-        device = Device.objects.get(pk=self.device.pk)
+        device = Ipad.objects.get(pk=self.device.pk)
         assert_equal(device.status, Device.CHECKED_OUT)
         assert_equal(device.lendee.subject.subject_id, 123451)
         # updated status is shown on page
