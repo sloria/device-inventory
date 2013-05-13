@@ -8,7 +8,7 @@
 
 {# Only show device actions for admins and experimenters #}
 {% if perms.user.can_update_device_attributes %}
-  <h2>iPads</h2>
+  <h2>{{ device_type }}</h2>
 {% endif %}
   
   {% if all_devices.count %}  

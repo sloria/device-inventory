@@ -8,13 +8,33 @@ from inventory.devices.views import *
 urlpatterns = patterns('',
     # ex: /devices
     url(r'^$', 
-        IpadsListView.as_view(),
+        DevicesListView.as_view(),
+        kwargs={'device_type': 'ipads'},
         name='index'),
 
     # ex: /devices/ipads/
     url(r'^ipads/$', 
-        IpadsListView.as_view(),
+        DevicesListView.as_view(),
+        kwargs={'device_type': 'ipads'},
         name='ipads'),
+
+    # ex: /devices/headphones/
+    url(r'^headphones/$', 
+        DevicesListView.as_view(),
+        kwargs={'device_type': 'headphones'},
+        name='headphones'),
+
+    # ex: /devices/adapters/
+    url(r'^adapters/$', 
+        DevicesListView.as_view(),
+        kwargs={'device_type': 'adapters'},
+        name='adapters'),
+
+    # ex: /devices/cases/
+    url(r'^cases/$', 
+        DevicesListView.as_view(),
+        kwargs={'device_type': 'cases'},
+        name='cases'),
 
     # ex: /devices/3/
     url(r'^(?P<pk>\d+)/$',

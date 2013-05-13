@@ -89,11 +89,9 @@ class CheckinForm(forms.Form):
         )
         return super(CheckinForm, self).__init__(*args, **kwargs)
 
-class IpadEditForm(forms.ModelForm):
+class DeviceUpdateForm(forms.ModelForm):
     '''Form for updating a device's attributes.
     '''
-    class Meta:
-        model = Ipad
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
@@ -117,7 +115,23 @@ class IpadEditForm(forms.ModelForm):
                 Submit('submit', "Submit")
             )
         )
-        return super(IpadEditForm, self).__init__(*args, **kwargs)
+        return super(DeviceUpdateForm, self).__init__(*args, **kwargs)
+
+class IpadUpdateForm(DeviceUpdateForm):
+    class Meta:
+        model = Ipad
+
+class HeadphonesUpdateForm(DeviceUpdateForm):
+    class Meta:
+        model = Headphones
+
+class AdapterUpdateForm(DeviceUpdateForm):
+    class Meta:
+        model = Adapter
+
+class CaseUpdateForm(DeviceUpdateForm):
+    class Meta:
+        model = Case
 
 class CommentEditForm(forms.ModelForm):
     '''Form for updating a comment.

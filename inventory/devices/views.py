@@ -1,5 +1,4 @@
 """Devices views."""
-
 import re
 from django.core.urlresolvers import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,8 +7,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
-from django.views.generic import (View, ListView, DetailView, TemplateView,
-    CreateView, UpdateView, FormView)
+from django.views.generic import (View, DetailView, TemplateView,
+                                    UpdateView, FormView)
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 import verhoeff
@@ -17,24 +16,39 @@ import verhoeff
 from inventory.devices.models import *
 from inventory.user.models import Subject, Lendee
 from inventory.devices.forms import (DeviceForm, CheckinForm, 
-    CommentEditForm, IpadEditForm)
+    CommentEditForm, IpadUpdateForm, AdapterUpdateForm,
+    CaseUpdateForm, HeadphonesUpdateForm)
 
 EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
-class IpadsListView(TemplateView):
-    '''Index view for devices.'''
+class DevicesListView(TemplateView):
+    '''Index view for devices. This serves as a list view 
+    for all device types.'''
     template_name = 'devices/index.html'
 
-    def get(self, request):
+    def get(self, request, **kwargs):
         if request.user.is_authenticated():
-            return super(IpadsListView, self).get(request)
+            return super(DevicesListView, self).get(request)
         else:
             return redirect('home')
 
     def get_context_data(self, **kwargs):
-        context = super(IpadsListView, self).get_context_data(**kwargs)
-        context['contenttype_id'] = ContentType.objects.get_for_model(Ipad).pk
-        context['all_devices'] = Ipad.objects.all()
+        device_type = self.kwargs['device_type']
+        device_class = None
+        if device_type == 'ipads':
+            device_class = Ipad
+        elif device_type == 'headphones':
+            device_class = Headphones
+        elif device_type == 'adapters':
+            device_class = Adapter
+        elif device_type == 'cases':
+            device_class = Case
+
+        context = super(DevicesListView, self).get_context_data(**kwargs)
+        context['contenttype_id'] = ContentType.objects\
+                                        .get_for_model(device_class).pk
+        context['all_devices'] = device_class.objects.all()
+        context['device_type'] = self.kwargs['device_type'].capitalize()
         return context
 
 class IpadDetail(DetailView):
@@ -277,11 +291,26 @@ class DeviceCheckin(FormView):
         # Change device condition
         return super(DeviceCheckin, self).form_valid(form)
 
-class IpadUpdate(UpdateView):
-    model = Ipad
-    form_class = IpadEditForm
+class DeviceUpdateView(UpdateView):
     template_name = 'devices/edit.html'
-    success_url = reverse_lazy('devices:ipads')
     context_object_name = 'device'
 
+class IpadUpdate(DeviceUpdateView):
+    model = Ipad
+    form_class = IpadUpdateForm
+    success_url = reverse_lazy('devices:ipads')
 
+class HeadphonesUpdate(DeviceUpdateView):
+    model = Headphones
+    form_class = HeadphonesUpdateForm
+    success_url = reverse_lazy('devices:headphones')
+
+class AdapterUpdate(DeviceUpdateView):
+    model = Adapter
+    form_class = AdapterUpdateForm
+    success_url = reverse_lazy('devices:adapters')
+
+class CaseUpdate(DeviceUpdateView):
+    model = Case
+    form_class = CaseUpdateForm
+    success_url = reverse_lazy('devices:cases') 

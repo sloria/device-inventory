@@ -74,6 +74,15 @@ class Device(models.Model):
         elif self.status in [Device.CHECKED_OUT]:
             return '#ffcc00'
 
+    def check_in(self, condition):
+        """Checks in a device.
+        """
+        self.condition = condition
+        self.status = Device.CHECKED_IN
+        self.lendee = None
+        self.lender = None
+        return self.save()
+
     class Meta:
         abstract = True
         permissions = (
@@ -111,6 +120,17 @@ class Ipad(Device):
             self.name = "iPad"
         self.updated_at = timezone.now()
         super(Ipad, self).save(*args, **kwargs)
+
+    def check_in(self, condition):
+        """Ipad-specific checkin method.
+        Changes status to Checked in - NOT READY instead 
+        of just CHECKED_IN.
+        """
+        self.condition = condition
+        self.status = Device.CHECKED_IN_NOT_READY
+        self.lendee = None
+        self.lender = None
+        return self.save()
 
     def get_cname(self):
         return 'ipad'

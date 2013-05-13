@@ -10,7 +10,11 @@
       <a href="{% url 'home' %}" class="brand" href="#">Inventory</a>
       <div class="nav-collapse collapse">
         <ul class="nav">
-          <li><a href="{% url 'home'%}">iPads</a></li>
+          <li><a href="{% url 'home'%}">Home/iPads</a></li>
+          <li><a href="{% url 'devices:headphones' %}">Headphones</a></li>
+          <li><a href="{% url 'devices:adapters' %}">Adapters</a></li>
+          <li><a href="{% url 'devices:cases' %}">Cases</a></li>
+
         </ul>
 
         {% if user.is_authenticated %}
