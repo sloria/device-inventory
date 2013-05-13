@@ -74,9 +74,24 @@ urlpatterns = patterns('',
         name='checkin'),
 
     # ex: /devices/ipads/3/edit
-    url(r'^(?P<device_type>\w+)/(?P<pk>\d+)/edit/$',
+    url(r'^ipads/(?P<pk>\d+)/edit/$',
         IpadUpdate.as_view(),
-        name='update'),
+        name='ipad_update'),
+
+    # ex: /devices/headphones/3/edit
+    url(r'^headphones/(?P<pk>\d+)/edit/$',
+        HeadphonesUpdate.as_view(),
+        name='headphones_update'),
+
+    # ex: /devices/cases/3/edit
+    url(r'^cases/(?P<pk>\d+)/edit/$',
+        CaseUpdate.as_view(),
+        name='case_update'),
+
+    # ex: /devices/adapters/3/edit
+    url(r'^adapters/(?P<pk>\d+)/edit/$',
+        AdapterUpdate.as_view(),
+        name='adapter_update'),
 
     # ex: /devices/3/comment/4/delete
     url(r'^(?P<device_id>\d+)/comment/(?P<comment_id>\d+)/delete/$',
