@@ -48,15 +48,29 @@ class DevicesListView(TemplateView):
         context['contenttype_id'] = ContentType.objects\
                                         .get_for_model(device_class).pk
         context['all_devices'] = device_class.objects.all()
-        context['device_type'] = self.kwargs['device_type'].capitalize()
+        context['device_type'] = self.kwargs['device_type']
         return context
 
-class IpadDetail(DetailView):
+class DeviceDetailView(DetailView):
+    '''Generic detail view for devices.
+    '''
+    context_object_name = 'device'
+    template_name = 'devices/detail.html'
+
+
+class IpadDetail(DeviceDetailView):
     """Detail view for iPads.
     """
     model = Ipad
-    context_object_name = 'device'
-    template_name = 'devices/detail.html'
+
+class HeadphonesDetail(DeviceDetailView):
+    model = Headphones
+
+class AdapterDetail(DeviceDetailView):
+    model = Adapter
+
+class CaseDetail(DeviceDetailView):
+    model = Case
 
 class DeviceAdd(FormView):
     '''View for adding a device.
@@ -147,7 +161,7 @@ class DeviceCheckout(View):
     '''View for checking out a device.
     Passes a list of possible lendees to the template for selection.
     '''
-    def post(self, request, pk):
+    def post(self, request, device_type, pk):
         '''Checks out a device to either a user or a subject.
         '''
         # get the post data (a string that's either a subject ID or e-mail address)
@@ -201,11 +215,11 @@ class DeviceCheckoutConfirm(View):
         # Get the correct device type from POST data
         device_type = self.request.POST['device_type']
         device_class = None
-        if device_type == 'ipad':
+        if device_type == 'ipads':
             device_class = Ipad
         elif device_type == 'headphones':
             device_class = Headphones
-        elif device_type == 'adapter':
+        elif device_type == 'adapters':
             device_class = Adapter
         else:
             device_class = Case
@@ -217,7 +231,7 @@ class DeviceCheckoutConfirm(View):
         device.save()
         return device
 
-    def post(self, request, pk):
+    def post(self, request, device_type, pk):
         response_data = {}
         # Lendee email has already been validated in DeviceCheckout
         lendee_str = request.POST['lendee']
@@ -249,11 +263,11 @@ class DeviceCheckin(FormView):
         # get the correct device type from POST data
         device_type = self.kwargs['device_type']
         device_class = None
-        if device_type == 'ipad':
+        if device_type == 'ipads':
             device_class = Ipad
         elif device_type == 'headphones':
             device_class = Headphones
-        elif device_type == 'adapter':
+        elif device_type == 'adapters':
             device_class = Adapter
         else:
             device_class = Case

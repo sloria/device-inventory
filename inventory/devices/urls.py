@@ -36,11 +36,25 @@ urlpatterns = patterns('',
         kwargs={'device_type': 'cases'},
         name='cases'),
 
-    # ex: /devices/3/
-    url(r'^(?P<pk>\d+)/$',
+    # ex: /devices/ipads/3/
+    url(r'^ipads/(?P<pk>\d+)/$',
         IpadDetail.as_view(),
-        name='detail'
-        ),
+        name='ipad_detail'),
+
+    # ex: /devices/headphones/3/
+    url(r'^headphones/(?P<pk>\d+)/$',
+        HeadphonesDetail.as_view(),
+        name='ipad_detail'),
+
+    # ex: /devices/adapters/3/
+    url(r'^adapters/(?P<pk>\d+)/$',
+        AdapterDetail.as_view(),
+        name='adapter_detail'),
+
+    # ex: /devices/cases/3/
+    url(r'^cases/(?P<pk>\d+)/$',
+        CaseDetail.as_view(),
+        name='case_detail'),
 
     # ex: /devices/add
     url(r'^add/$', 
@@ -49,26 +63,24 @@ urlpatterns = patterns('',
 
     url(r'^permissions/denied/$',
         TemplateView.as_view(template_name='403.html'),
-        name='permission_denied'
-        ),
+        name='permission_denied'),
     
     # ex: /devices/3/delete/
     url(r'^(?P<pk>\d+)/delete/$',
         DeviceDelete.as_view(),
-        name='delete'
-        ),
+        name='delete'),
 
-    # ex: /devices/3/checkout
-    url(r'^(?P<pk>\d+)/checkout/$',
+    # ex: /devices/ipads/3/checkout
+    url(r'^(?P<device_type>\w+)/(?P<pk>\d+)/checkout/$',
         DeviceCheckout.as_view(),
-        name='checkout'),
+        name='device_checkout'),
 
-    # ex: /devices/3/checkout/confirm
-    url(r'^(?P<pk>\d+)/checkout/confirm$',
+    # ex: /devices/ipads/3/checkout/confirm
+    url(r'^(?P<device_type>\w+)/(?P<pk>\d+)/checkout/confirm/$',
         DeviceCheckoutConfirm.as_view(),
         name='checkout_confirm'),
 
-    # ex: /devices/3/checkin
+    # ex: /devices/ipads/3/checkin
     url(r'^(?P<device_type>\w+)/(?P<pk>\d+)/checkin/$',
         DeviceCheckin.as_view(),
         name='checkin'),

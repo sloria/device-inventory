@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <h1 class="page-title center">{{ device.name }}</h1>
-<h2 class="center text-info">{{ device.get_verbose_status }}</h2>
+<h2 style="color:{{ device.get_status_color }}"class="center">{{ device.get_verbose_status }}</h2>
 
 <dl id="id-device_info" class="dl-horizontal">
     <dt>Name</dt>
@@ -9,11 +9,15 @@
     <dt>Last updated</dt>
     <dd>{{ device.updated_at }}</dd>
     <dt>Status</dt>
-    <dd class='text-info'>{{ device.get_verbose_status }}</dd>
+    <dd style="color:{{ device.get_status_color }}">{{ device.get_verbose_status }}</dd>
     <dt>Condition</dt>
     <dd>{{ device.get_condition_display }}</dd>
     <dt>Description</dt>
-    <dd>{{ device.description }}</dd>
+    {% if device.description %}
+    <dd>{{ device.description }}</dd>   
+    {% else %}
+    <dd>-----</dd> 
+    {% endif %}
     {% if device.responsible_party %}
     <dt>Responsible party</dt>
     <dd>{{ device.responsible_party }}</dd>  
@@ -21,7 +25,11 @@
     <dt>Make</dt>
     <dd>{{ device.make }}</dd>
     <dt>Serial</dt>
+    {% if device.serial_number %}
     <dd>{{ device.serial_number }}</dd>
+    {% else %}
+    <dd>-----</dd>
+    {% endif %}
     <dt>Purchased at</dt>
     <dd>{{ device.purchased_at }}</dd>
 </dl>

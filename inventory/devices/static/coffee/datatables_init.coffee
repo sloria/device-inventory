@@ -34,8 +34,12 @@ initialize_table = () ->
                     'sButtonText': '<i class="icon-signout"></i> Check OUT'
                     'fnClick': (nButton, oConfig, oFlash) ->
                         selected = oTT.fnGetSelected(oTable)
+                        pk = get_selected_id(selected)
                         if selected.length < 1
+                            # Check if device has been reset
                             alert('Please select a device')
+                        else if is_in("NOT READY", get_td("Status", parseInt(pk)))
+                            alert("Cannot check out this device. Device has not been reset.")
                         else
                             ret = prompt("Check OUT - Enter a subject ID or user's e-mail address: ", "")
                             if (ret)
@@ -54,7 +58,7 @@ initialize_table = () ->
                             # show an alert
                             alert('Please select a device')
                         # else if the device is already checked in
-                        else if get_td("Status", parseInt(pk)).indexOf("Checked in") isnt -1
+                        else if is_in("Checked in", get_td("Status", parseInt(pk)))
                             alert("Device is already checked in")
                         else
                             checkin_selected()
@@ -71,7 +75,8 @@ initialize_table = () ->
                             alert('Please select a device')
                         else
                             pk = get_selected_id(selected)
-                            window.location = "/devices/#{pk}/"
+                            device_class = get_selected_class(selected)
+                            window.location = "/devices/#{device_class}/#{pk}/"
                 },
                 # Edit
                 {
@@ -102,8 +107,9 @@ initialize_table = () ->
 checkout_selected = (lendee) ->
     selected = oTT.fnGetSelected(oTable)
     pk = get_selected_id(selected)
+    device_type = get_selected_class(selected)
     $.ajax(
-        url: "/devices/#{pk}/checkout/"
+        url: "/devices/#{device_type}/#{pk}/checkout/"
         type: 'POST',
         data: {
             "lendee": lendee,
@@ -116,15 +122,15 @@ checkout_selected = (lendee) ->
                 confirmed = confirm("Confirm check out to #{data.name}?")
                 if confirmed
                     $.ajax(
-                        url: "/devices/#{pk}/checkout/confirm",
+                        url: "/devices/#{device_type}/#{pk}/checkout/confirm/",
                         type: 'POST',
                         data: {
                             'lendee': lendee,
-                            'device_type': get_selected_class(selected)
+                            'device_type': device_type
                         },
                         success: (data) ->
                             # Refresh the page
-                            window.location = "/devices"       
+                            window.location = "/devices/#{device_type}/"       
                     )
     )
 
@@ -205,3 +211,7 @@ get_selected_ids = (selected) ->
     Returns an array of ids for the selected devices.
     ###
     $.map(selected, (element) -> $(element).data('id'))
+
+is_in = (sub, whole) ->
+    return whole.indexOf(sub) isnt -1
+

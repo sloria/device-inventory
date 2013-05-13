@@ -67,9 +67,10 @@ class Device(models.Model):
     def get_status_color(self):
         '''Return a css color that corresponds to the device's status.
         '''
-        if self.status in [Device.CHECKED_IN_NOT_READY]:
+        if self.status in [Device.CHECKED_IN_NOT_READY,
+                            Device.BROKEN]:
             return 'red'
-        elif self.status in [Device.CHECKED_IN_READY]:
+        elif self.status in [Device.CHECKED_IN_READY, Device.CHECKED_IN]:
             return 'green'
         elif self.status in [Device.CHECKED_OUT]:
             return '#ffcc00'

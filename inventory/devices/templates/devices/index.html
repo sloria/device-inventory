@@ -2,14 +2,9 @@
 {% load url from future %}
 {% block content_class %}container{% endblock content_class %}
 {% block content %}
-<h1 class="page-title center">Devices</h1>
+<h1 class="page-title center">{{ device_type|title }}</h1>
 <div class="btn-toolbar">
   {% if user.is_authenticated %}
-
-{# Only show device actions for admins and experimenters #}
-{% if perms.user.can_update_device_attributes %}
-  <h2>{{ device_type }}</h2>
-{% endif %}
   
   {% if all_devices.count %}  
   <table id="id_devices_table" class='table table-striped'>
@@ -24,7 +19,7 @@
     </thead>
     <tbody>
     {% for device in all_devices %}
-      <tr data-id="{{ device.pk }}" data-type="{{ device.get_cname }}">   
+      <tr data-id="{{ device.pk }}" data-type="{{ device_type }}">   
         {# <td><input type="checkbox" value="{{ device.pk }}" name='device_select' id="select_device{{ device.pk }}"></td> #}
         <td>{{ device.name }}</td>
         <td style="color:{{ device.get_status_color }}">
