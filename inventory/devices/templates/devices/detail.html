@@ -37,7 +37,7 @@
 <h3>Check-in Comments</h3>
 <ul>
     
-{% for comment in device.comments.all %}
+{% for comment in comments %}
     {# Comment text #}
     <li data-id="{{ comment.pk }}">{{ comment.text }} 
         {# Comment info #}
@@ -47,7 +47,8 @@
             <a href="mailto:{{ comment.user.username }}">{{ comment.user.username }}</a>)
         </div>
         {% if request.user == comment.user %}
-            <a href="{% url 'devices:edit_comment' device.pk comment.pk %}"><i class="icon-pencil"></i>Edit</a>    
+            {# TODO: url should correspond to device class #}
+            <a href="{{ comment.edit_url }}"><i class="icon-pencil"></i>Edit</a>    
             <a id="id-comment_delete" href="#"><i class="icon-remove"></i>Delete</a>
         {% endif %}
     </li>    

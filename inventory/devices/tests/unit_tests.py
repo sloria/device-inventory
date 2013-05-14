@@ -1,12 +1,11 @@
 '''Unit tests for the devices models.'''
 
-from django.test import TestCase
 from nose.tools import *
+from django.test import TestCase
 
 from inventory.devices.models import *
 from inventory.devices.tests.factories import (IpadFactory,
-    HeadphonesFactory,
-    create_device_factories)
+    HeadphonesFactory, create_device_factories)
 
 
 class IpadTest(TestCase):
@@ -46,3 +45,4 @@ class FactoryTest(TestCase):
         assert_in('headphones', headphones.make.lower())
         assert_in('adapter', adapter.make.lower())
         assert_in('case', case.make.lower())
+

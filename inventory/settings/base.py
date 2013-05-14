@@ -68,6 +68,7 @@ INTERNAL_APPS = [
 
     # Local apps, referenced via inventory.appname
     'inventory.devices',
+    'inventory.comments',
     'inventory.user',
     'inventory.selenium_tests',
 ]

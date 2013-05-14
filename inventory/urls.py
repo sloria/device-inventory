@@ -15,6 +15,7 @@ urlpatterns = patterns('',
     # This includes django.contrib.auth URLs
     (r'^accounts/', include('registration.backends.default.urls')),
     (r'^devices/', include('inventory.devices.urls', namespace='devices')),
+    (r'^devices/comments/', include('inventory.comments.urls', namespace='comments')),
     (r'^users/', include('inventory.user.urls', namespace='users')),
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     (r'^admin/', include(admin.site.urls)),

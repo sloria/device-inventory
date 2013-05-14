@@ -2,21 +2,22 @@
 import re
 from django.core.urlresolvers import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.utils import simplejson as json
 from django.views.generic import (View, DetailView, TemplateView,
                                     UpdateView, FormView)
 from django.contrib.contenttypes.models import ContentType
-from django.utils import timezone
 import verhoeff
 
-from inventory.devices.models import *
+from inventory.devices.models import Ipad, Adapter, Headphones, Case
+from inventory.comments.models import (IpadComment, AdapterComment,
+        HeadphonesComment, CaseComment)
 from inventory.user.models import Subject, Lendee
 from inventory.devices.forms import (DeviceForm, CheckinForm, 
-    CommentEditForm, IpadUpdateForm, AdapterUpdateForm,
+    IpadUpdateForm, AdapterUpdateForm,
     CaseUpdateForm, HeadphonesUpdateForm)
 
 EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
@@ -57,20 +58,44 @@ class DeviceDetailView(DetailView):
     context_object_name = 'device'
     template_name = 'devices/detail.html'
 
+    def get_comments(self, comment_class, **kwargs):
+        return comment_class.objects.filter(device__pk=self.get_object().pk)
+
 
 class IpadDetail(DeviceDetailView):
     """Detail view for iPads.
     """
     model = Ipad
 
+    def get_context_data(self, **kwargs):
+        context = super(IpadDetail, self).get_context_data(**kwargs)
+        context['comments'] = self.get_comments(IpadComment)
+        return context
+
 class HeadphonesDetail(DeviceDetailView):
     model = Headphones
+    comment_model = HeadphonesComment
+
+    def get_context_data(self, **kwargs):
+        context = super(HeadphonesDetail, self).get_context_data(**kwargs)
+        context['comments'] = self.get_comments(HeadphonesComment)
+        return context
 
 class AdapterDetail(DeviceDetailView):
     model = Adapter
 
+    def get_context_data(self, **kwargs):
+        context = super(AdapterDetail, self).get_context_data(**kwargs)
+        context['comments'] = self.get_comments(AdapterComment)
+        return context
+
 class CaseDetail(DeviceDetailView):
     model = Case
+
+    def get_context_data(self, **kwargs):
+        context = super(CaseDetail, self).get_context_data(**kwargs)
+        context['comments'] = self.get_comments(CaseComment)
+        return context
 
 class DeviceAdd(FormView):
     '''View for adding a device.
@@ -130,32 +155,6 @@ class DeviceDelete(View):
         json_data = json.dumps(data)
         return HttpResponse(json_data, mimetype="application/json")
 
-class CommentEdit(UpdateView):
-    template_name = "devices/edit_comment.html"
-    model = Comment
-    form_class = CommentEditForm
-    pk_url_kwarg = "comment_id"
-
-    def form_valid(self, form):
-        # Update the devices updated_at attribute before saving
-        Ipad.objects.filter(pk=int(self.kwargs['device_id']))\
-                                .update(updated_at=timezone.now())
-        return super(CommentEdit, self).form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy('devices:detail', args=[self.kwargs['device_id']])
-
-class CommentDelete(View):
-    def post(self, request, device_id, comment_id):
-        '''Deletes the comment with the given pk.
-        '''
-        data = {}
-        Comment.objects.filter(pk=comment_id).delete()
-        messages.success(request, 'Successfully deleted comment.')
-        data['success'] = True
-        data['pk'] = comment_id
-        json_data = json.dumps(data)
-        return HttpResponse(json_data, mimetype='application/json')
 
 class DeviceCheckout(View):
     '''View for checking out a device.
@@ -262,17 +261,21 @@ class DeviceCheckin(FormView):
         '''
         # get the correct device type from POST data
         device_type = self.kwargs['device_type']
-        device_class = None
+        self.device_class = None
         if device_type == 'ipads':
-            device_class = Ipad
+            self.device_class = Ipad
+            self.comment_class = IpadComment
         elif device_type == 'headphones':
-            device_class = Headphones
+            self.device_class = Headphones
+            self.comment_class = HeadphonesComment
         elif device_type == 'adapters':
-            device_class = Adapter
+            self.device_class = Adapter
+            self.comment_class = AdapterComment
         else:
-            device_class = Case
+            self.device_class = Case
+            self.comment_class = CaseComment
         # Initialize the new device object
-        device = device_class.objects.get(pk=pk)
+        device = self.device_class.objects.get(pk=pk)
         return device
 
     def form_valid(self, form):
@@ -298,9 +301,10 @@ class DeviceCheckin(FormView):
         device.save()
         # save the comment if it exists
         if form.cleaned_data['comment']:
-            Comment.objects.create(text=form.cleaned_data['comment'],
-                                    device=device,
-                                    user = self.request.user)
+            self.comment_class\
+                .objects.create(text=form.cleaned_data['comment'],
+                                device=device,
+                                user=self.request.user)
         messages.success(self.request, 'Successfully checked in')
         # Change device condition
         return super(DeviceCheckin, self).form_valid(form)

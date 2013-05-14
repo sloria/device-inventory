@@ -1,5 +1,4 @@
 '''Models for the devices app.'''
-
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -120,7 +119,7 @@ class Ipad(Device):
         if not self.name:
             self.name = "iPad"
         self.updated_at = timezone.now()
-        super(Ipad, self).save(*args, **kwargs)
+        return super(Ipad, self).save(*args, **kwargs)
 
     def check_in(self, condition):
         """Ipad-specific checkin method.
@@ -158,7 +157,7 @@ class Headphones(Device):
         if not self.name:
             self.name = "Headphones"
         self.updated_at = timezone.now()
-        super(Headphones, self).save(*args, **kwargs)
+        return super(Headphones, self).save(*args, **kwargs)
 
     def get_cname(self):
         return 'headphones'
@@ -185,7 +184,7 @@ class Adapter(Device):
         if not self.name:
             self.name = "Power adapter"
         self.updated_at = timezone.now()
-        super(Adapter, self).save(*args, **kwargs)
+        return super(Adapter, self).save(*args, **kwargs)
 
     def get_cname(self):
         return 'adapter'
@@ -212,27 +211,10 @@ class Case(Device):
         # If name isn't specified, set default name
         if not self.name:
             self.name = "Case"
-        self.update_at = timezone.now()
-        super(Case, self).save(*args, **kwargs)
+        self.updated_at = timezone.now()
+        return super(Case, self).save(*args, **kwargs)
 
     def get_cname(self):
         return 'case'
-
-
-class Comment(models.Model):
-    """A comment for an iPad. These are added when iPads
-    are checked in."""
-    text = models.TextField(max_length=1000, null=False, blank=False)
-    device = models.ForeignKey(Ipad, related_name='comments')
-    user = models.ForeignKey(User, related_name='comments')
-    created_at = models.DateTimeField('created at', default=timezone.now())
-    updated_at = models.DateTimeField('updated at', default=timezone.now())
-
-    class Meta:
-        get_latest_by = 'updated_at'
-        ordering = ['-updated_at', '-created_at']
-
-    def get_cname(self):
-        return 'comment'
 
 

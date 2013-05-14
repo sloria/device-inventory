@@ -1,4 +1,4 @@
-"""urlconf for the base application"""
+"""urlconf for devices"""
 
 from django.conf.urls.defaults import url, patterns
 from django.views.generic import TemplateView
@@ -44,7 +44,7 @@ urlpatterns = patterns('',
     # ex: /devices/headphones/3/
     url(r'^headphones/(?P<pk>\d+)/$',
         HeadphonesDetail.as_view(),
-        name='ipad_detail'),
+        name='headphones_detail'),
 
     # ex: /devices/adapters/3/
     url(r'^adapters/(?P<pk>\d+)/$',
@@ -104,16 +104,4 @@ urlpatterns = patterns('',
     url(r'^adapters/(?P<pk>\d+)/edit/$',
         AdapterUpdate.as_view(),
         name='adapter_update'),
-
-    # ex: /devices/3/comment/4/delete
-    url(r'^(?P<device_id>\d+)/comment/(?P<comment_id>\d+)/delete/$',
-        CommentDelete.as_view(),
-        name='delete_comment'),
-
-        # ex: /devices/3/comment/4/edit
-    url(r'^(?P<device_id>\d+)/comment/(?P<comment_id>\d+)/edit/$',
-        CommentEdit.as_view(),
-        name='edit_comment'),
-
-
 )

@@ -18,6 +18,10 @@ TEST_RUNNER = 'inventory.testrunner.NoseCoverageTestRunner'
 COVERAGE_MODULE_EXCLUDES = [
     'tests$', 'settings$', 'urls$', 'locale$',
     'migrations', 'fixtures', 'admin$', 'django_extensions',
+    'inventory.base.management.commands.coffee',
+    'inventory.devices.verhoeff',
+    'inventory.devices.utils',
+    'inventory.devices.subid',
 ]
 NOSE_ARGS = ['--verbosity=2']
 

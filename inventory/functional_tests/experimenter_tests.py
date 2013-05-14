@@ -1,12 +1,19 @@
 '''Functional tests for an Experimenter User'''
 
-from django_webtest import WebTest
 from nose.tools import *
+from django.core.urlresolvers import reverse
+from django_webtest import WebTest
+
 from inventory.user.tests.factories import UserFactory, ExperimenterFactory
-from inventory.devices.tests.factories import IpadFactory
-from inventory.devices.models import Device, Ipad, Comment
+from inventory.devices.tests.factories import (IpadFactory, HeadphonesFactory,
+    AdapterFactory, CaseFactory)
+from inventory.comments.tests.factories import (IpadCommentFactory, 
+        HeadphonesCommentFactory, AdapterCommentFactory, CaseCommentFactory)
+from inventory.devices.models import Device, Ipad
 
 class TestAnExperimenter(WebTest):
+    csrf_checks = False
+
     def setUp(self):
         user = UserFactory(first_name="Ellen", last_name="Experimenter")
         self.experimenter = ExperimenterFactory(user=user)
@@ -65,7 +72,7 @@ class TestAnExperimenter(WebTest):
         # a device is created
         device = IpadFactory()
         # goes to its detail page
-        res = self.app.get('/devices/{pk}/'.format(pk=device.pk))
+        res = self.app.get('/devices/ipads/{pk}/'.format(pk=device.pk))
         res.mustcontain(device.name,
                         device.get_verbose_status(),
                         device.get_condition_display(),
@@ -78,7 +85,7 @@ class TestAnExperimenter(WebTest):
                             make="iPad 4",
                             status=Device.CHECKED_IN_NOT_READY)
         # goes to edit page
-        res = self.app.get('/devices/ipad/{pk}/edit/'.format(pk=device.pk))
+        res = self.app.get('/devices/ipads/{pk}/edit/'.format(pk=device.pk))
         # there's a form for editing
         form = res.forms['id-edit_form']
         form['status'] = Device.CHECKED_IN_READY
@@ -89,15 +96,15 @@ class TestAnExperimenter(WebTest):
         device = Ipad.objects.get(pk=device.pk)
         assert_equal(device.status, Device.CHECKED_IN_READY)
 
-    def test_can_edit_comment(self):
+    def test_can_edit_ipad_comment(self):
         # A device is created
         device = IpadFactory()
         # It has a check-in comment
-        comment = Comment.objects.create(text="Just a bigger iPhone", 
-                                        device=device,
-                                        user=self.experimenter.user)
+        comment = IpadCommentFactory(text="Just a bigger iPhone", 
+                                    device=device,
+                                    user=self.experimenter.user)
         # goes to the detail page
-        res = self.app.get('/devices/{pk}/'.format(pk=device.pk), 
+        res = self.app.get('/devices/ipads/{pk}/'.format(pk=device.pk), 
                                             user=self.experimenter.user)
         # can see the comment
         assert_in(comment.text, res)
@@ -111,6 +118,99 @@ class TestAnExperimenter(WebTest):
         # submits the form
         res = form.submit().follow()
         # back at the detail page
-        assert_equal(res.request.path, '/devices/{pk}/'.format(pk=device.pk))
+        assert_equal(res.request.path, 
+                    '/devices/ipads/{pk}/'.format(pk=device.pk))
         # sees the new comment text
         assert_in('Or a flat MacBook Air', res)
+
+    def test_can_edit_headphones_comment(self):
+        # a device is created
+        device = HeadphonesFactory()
+        # it has a comment
+        comment = HeadphonesCommentFactory(device=device,
+                                        user=self.experimenter.user)
+        # goes to detail page
+        res = self.app.get('/devices/headphones/{pk}/'.format(pk=device.pk),
+                                                    user=self.experimenter.user)
+        # can see the comment
+        assert_in(comment.text, res)
+        # clicks the edit link
+        res = res.click('Edit')
+        # sees a form
+        assert_in('Edit comment', res)
+        form = res.forms['id-edit_comment_form']
+        # changes the comment text
+        form['text'] = 'new text'
+        # submits the form
+        res = form.submit().follow()
+        # back at the detail page
+        assert_equal(res.request.path, 
+                    '/devices/headphones/{pk}/'.format(pk=device.pk))
+        # sees the new comment text
+        assert_in('new text', res)
+
+    def _test_delete_comment(self, device, comment,
+                            detail_url, delete_url):
+
+        # The initial count of comments (should be 1)
+        comment_class = comment.__class__
+        init_count = comment_class.objects.count()
+        # goes to detail page
+        res = self.app.get(detail_url,
+                        user=self.experimenter.user)
+        # can see the comment
+        assert_in(comment.text, res)
+        # clicks the delete button
+        res = self.app.post(delete_url,
+                            user=self.experimenter.user)
+        # device was deleted from db
+        assert_equal(comment_class.objects.count(), init_count - 1)
+        # goes to the device detail page
+        res = self.app.get(detail_url,
+                            user=self.experimenter.user)
+        # the comment isn't there anymore
+        assert_not_in(comment.text, res)
+
+    def test_can_delete_ipad_comment(self):
+        device = IpadFactory()
+        comment = IpadCommentFactory(device=device, 
+                                    user=self.experimenter.user)
+        self._test_delete_comment(device, comment,
+                    detail_url='/devices/ipads/{pk}/'.format(pk=device.pk),
+                    delete_url=reverse('comments:ipad_delete',
+                                    args=(device.pk, comment.pk))
+        )
+
+    def test_can_delete_headphones_comment(self):
+        device = HeadphonesFactory()
+        comment = HeadphonesCommentFactory(device=device, 
+                                    user=self.experimenter.user)
+        self._test_delete_comment(device, comment,
+                    detail_url='/devices/headphones/{pk}/'.format(pk=device.pk),
+                    delete_url=reverse('comments:headphones_delete',
+                                    args=(device.pk, comment.pk))
+        )
+
+    def test_can_delete_adapter_comment(self):
+        device = AdapterFactory()
+        comment = AdapterCommentFactory(device=device,
+                                    user=self.experimenter.user)
+        self._test_delete_comment(device, comment,
+                    detail_url='/devices/adapters/{pk}/'.format(pk=device.pk),
+                    delete_url=reverse('comments:adapter_delete',
+                                    args=(device.pk, comment.pk))
+        )
+
+    def test_can_delete_case_comment(self):
+        device = CaseFactory()
+        comment = CaseCommentFactory(device=device,
+                                    user=self.experimenter.user)
+        self._test_delete_comment(device, comment,
+                    detail_url='/devices/cases/{pk}/'.format(pk=device.pk),
+                    delete_url=reverse('comments:case_delete',
+                                    args=(device.pk, comment.pk))
+        )
+
+    def test_can_checkin(self):
+        assert False, 'finish me'
+
