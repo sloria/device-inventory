@@ -157,8 +157,8 @@ class DeviceDelete(View):
 
 
 class DeviceCheckout(View):
-    '''View for checking out a device.
-    Passes a list of possible lendees to the template for selection.
+    '''View for checking out a device. This will create the create a
+    Lendee object for either a user or a subject (depending on the user input).
     '''
     def post(self, request, device_type, pk):
         '''Checks out a device to either a user or a subject.
@@ -208,7 +208,7 @@ class DeviceCheckoutConfirm(View):
     '''View for confirming the checkout of a device.
     Accepts and AJAX request and updates a device record.
     '''
-    def _checkout_device(self, pk, lendee, lender):
+    def _checkout_device(self, pk, lender, lendee):
         '''Checks out the selected device.
         '''
         # Get the correct device type from POST data
@@ -224,10 +224,7 @@ class DeviceCheckoutConfirm(View):
             device_class = Case
         # Initialize the new device object
         device = device_class.objects.get(pk=pk)
-        device.lendee = lendee
-        device.lender = lender
-        device.status = Device.CHECKED_OUT
-        device.save()
+        device.check_out(lender, lendee)
         return device
 
     def post(self, request, device_type, pk):
@@ -243,7 +240,7 @@ class DeviceCheckoutConfirm(View):
             subject_id = int(lendee_str.replace('-', ''))
             lendee_obj = Lendee.objects.get(subject__subject_id=subject_id)
         # Update the device's lendee, lender, status, and updated at time
-        self._checkout_device(pk, lendee_obj, request.user)
+        self._checkout_device(pk, request.user, lendee_obj)
         response_data['success'] = True
         json_data = json.dumps(response_data)
         messages.success(request, 'Successfully checked out device')
@@ -254,6 +251,13 @@ class DeviceCheckin(FormView):
     form_class = CheckinForm
     template_name = 'devices/checkin.html'
     success_url = reverse_lazy('devices:index')
+
+    def get_success_url(self):
+        '''After submitting the checkin form, redirect to the 
+        appropriate device index page.
+        '''
+        device_type = self.kwargs['device_type']
+        return reverse_lazy('devices:{0}'.format(device_type))
 
     def _get_device(self, pk):
         '''Gets the device of the correct type and pk from the POST data.
@@ -274,31 +278,18 @@ class DeviceCheckin(FormView):
         else:
             self.device_class = Case
             self.comment_class = CaseComment
-        # Initialize the new device object
+        # get the device object
         device = self.device_class.objects.get(pk=pk)
         return device
 
     def form_valid(self, form):
         # Get the device
         device = self._get_device(self.kwargs['pk'])
-        # Change device status
-        if form.cleaned_data['condition'] == 'broken':
-            device.status = Device.BROKEN
-            device.condition = Device.BROKEN
-        elif form.cleaned_data['condition'] == 'scratched':
-            device.status = Device.CHECKED_IN_NOT_READY
-            device.condition = Device.SCRATCHED
-        elif form.cleaned_data['condition'] == 'missing':
-            device.status = Device.MISSING
-            device.condition = Device.MISSING
-        else:
-            device.status = Device.CHECKED_IN_NOT_READY
-            device.condition = Device.EXCELLENT
+        condition = form.cleaned_data['condition']
 
-        # Set the lendee and lender to None
-        device.lendee = None
-        device.lender = None
-        device.save()
+        # check in the device
+        device.check_in(condition)
+        
         # save the comment if it exists
         if form.cleaned_data['comment']:
             self.comment_class\
@@ -310,6 +301,7 @@ class DeviceCheckin(FormView):
         return super(DeviceCheckin, self).form_valid(form)
 
 class DeviceUpdateView(UpdateView):
+    '''Generic update view for devices.'''
     template_name = 'devices/edit.html'
     context_object_name = 'device'
 

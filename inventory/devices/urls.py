@@ -12,6 +12,8 @@ urlpatterns = patterns('',
         kwargs={'device_type': 'ipads'},
         name='index'),
 
+    # TODO: use just one urlpattern for all device list views
+
     # ex: /devices/ipads/
     url(r'^ipads/$', 
         DevicesListView.as_view(),
@@ -71,9 +73,10 @@ urlpatterns = patterns('',
         name='delete'),
 
     # ex: /devices/ipads/3/checkout
+    # this handles checkout for all devices
     url(r'^(?P<device_type>\w+)/(?P<pk>\d+)/checkout/$',
         DeviceCheckout.as_view(),
-        name='device_checkout'),
+        name='checkout'),
 
     # ex: /devices/ipads/3/checkout/confirm
     url(r'^(?P<device_type>\w+)/(?P<pk>\d+)/checkout/confirm/$',
@@ -81,6 +84,7 @@ urlpatterns = patterns('',
         name='checkout_confirm'),
 
     # ex: /devices/ipads/3/checkin
+    # this handles checkin of all devices
     url(r'^(?P<device_type>\w+)/(?P<pk>\d+)/checkin/$',
         DeviceCheckin.as_view(),
         name='checkin'),

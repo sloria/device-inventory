@@ -2,6 +2,7 @@
 
 from nose.tools import *
 from django.core.urlresolvers import reverse
+from django.core.exceptions import ObjectDoesNotExist
 from django_webtest import WebTest
 
 from inventory.user.tests.factories import UserFactory, ExperimenterFactory
@@ -9,7 +10,9 @@ from inventory.devices.tests.factories import (IpadFactory, HeadphonesFactory,
     AdapterFactory, CaseFactory)
 from inventory.comments.tests.factories import (IpadCommentFactory, 
         HeadphonesCommentFactory, AdapterCommentFactory, CaseCommentFactory)
+from inventory.user.tests.factories import SubjectFactory
 from inventory.devices.models import Device, Ipad
+from inventory.user.models import Lendee
 
 class TestAnExperimenter(WebTest):
     csrf_checks = False
@@ -211,12 +214,112 @@ class TestAnExperimenter(WebTest):
                                     args=(device.pk, comment.pk))
         )
 
-    def test_can_checkin(self):
-        assert False, 'finish me'
+    def _checkin(self, device, condition='excellent', expected_status=Device.CHECKED_IN):
 
-    def test_can_checkout_to_user(self):
-        assert False, 'finish me'
+        checkin_url = reverse('devices:checkin', args=(device.get_cname(), 
+                                                        device.pk))
+        # goes to checkin url
+        res = self.app.get(checkin_url, user=self.experimenter.user)
+        form = res.forms['id-checkin_form']
+        # enters a comment
+        form['condition'] = condition
+        form['comment'] = "looks good!"
+        # submits
+        res = form.submit().follow()
+        # back at the ipad index
+        assert_equal(res.request.path, '/devices/{0}/'.format(device.get_cname()))
+        # assert_in("Checked in", res)
+        # the device status and condition is changed in the db
+        device_class = device.__class__
+        device = device_class.objects.get(pk=device.pk)
+        assert_equal(device.status, expected_status)
+        # the device has a checkin comment
+        assert_equal(device.comments.count(), 1)
 
-    def test_can_checkout_to_subject(self):
-        assert False, 'finish me'
+    def test_can_checkin_ipad(self):
+        # an ipad is created
+        device = IpadFactory(status=Device.CHECKED_OUT)
+        # checks it in
+        self._checkin(device, expected_status=Device.CHECKED_IN_NOT_READY)
+
+    def test_can_checkin_screatched_ipad(self):
+        # an ipad is created
+        device = IpadFactory(status=Device.CHECKED_OUT)
+        # checks it in (sets condition to 'Scratched')
+        self._checkin(device, condition='scratched', 
+                            expected_status=Device.CHECKED_IN_NOT_READY)
+        # devices condition is updated
+        device = device.__class__.objects.get(pk=device.pk)
+        assert_equal(device.condition, Device.SCRATCHED)
+
+    def test_can_checkin_headphones(self):
+        # headphones are creted
+        device = HeadphonesFactory(status=Device.CHECKED_OUT)
+        # checks it in
+        self._checkin(device, expected_status=Device.CHECKED_IN)
+
+    def test_can_checkin_adapter(self):
+        # adapter is created
+        device = AdapterFactory(status=Device.CHECKED_OUT)
+        # checks it in
+        self._checkin(device, expected_status=Device.CHECKED_IN)
+
+    def test_can_checkin_case(self):
+        # case is created
+        device = CaseFactory(status=Device.CHECKED_OUT)
+        # checks it in
+        self._checkin(device, expected_status=Device.CHECKED_IN)
+
+    def _checkout(self, device, lendee_str):
+        checkout_url = reverse('devices:checkout', args=('ipads', 
+                                                        device.pk))
+        # goes to the checkout url
+        self.app.post(checkout_url,
+                        {'lendee' : lendee_str})
+        checkout_confirm_url = reverse('devices:checkout_confirm', args=('ipads', 
+                                                            device.pk))
+        # goes to checkout confirm url
+        self.app.post(checkout_confirm_url,
+                    {'device_type': 'ipads', 'lendee': lendee_str},
+                     user=self.experimenter.user)
+
+        # reload device
+        device = device.__class__.objects.get(pk=device.pk)
+        # status was changed in db
+        assert_equal(device.status, Device.CHECKED_OUT)
+        # the lendee and lender are correct
+        lender = self.experimenter.user
+        try:
+            # lendee is a user
+            lendee = Lendee.objects.get(user__username=lendee_str)
+        except ObjectDoesNotExist:
+            # lendee is a subject
+            subject_id = int(lendee_str.replace('-', ''))
+            lendee = Lendee.objects.get(subject__subject_id=subject_id)
+        assert_equal(device.lender, lender)
+        assert_equal(device.lendee, lendee)
+
+    def test_can_checkout_ipad_to_user(self):
+        # an ipad is created
+        device = IpadFactory(status=Device.CHECKED_IN_READY)
+        # a user is created
+        user = UserFactory()
+        # checks out the device to the user
+        self._checkout(device, user.username)
+
+    def test_can_checkout_to_subject_with_dashes(self):
+        # an ipad is created
+        device = IpadFactory(status=Device.CHECKED_IN_READY)
+        # a subject is created
+        SubjectFactory(subject_id='123451')
+        # checks out the device to the subject
+        self._checkout(device, '1-23-451')
+
+    def test_can_checkout_to_subject_without_dashes(self):
+        # an ipad is created
+        device = IpadFactory(status=Device.CHECKED_IN_READY)
+        # a subject is created
+        SubjectFactory(subject_id='123451')
+        # checks out the device to the subject
+        self._checkout(device, '123451')
 

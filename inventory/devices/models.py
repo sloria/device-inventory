@@ -74,14 +74,40 @@ class Device(models.Model):
         elif self.status in [Device.CHECKED_OUT]:
             return '#ffcc00'
 
-    def check_in(self, condition):
+    def check_in(self, condition='excellent'):
         """Checks in a device.
+
+        Args:
+        condition - String indicating the condition of
+                    the device. Must either 'excellent', 'broken',
+                    'missing', or 'scratched'.
+
         """
-        self.condition = condition
-        self.status = Device.CHECKED_IN
+        if condition == 'broken':
+            self.status = Device.BROKEN
+            self.condition = Device.BROKEN
+        elif condition == 'scratched':
+            self.condition = Device.SCRATCHED
+            self.status = Device.CHECKED_IN
+        elif condition == 'missing':
+            self.condition = Device.MISSING
+            self.status = Device.MISSING
+        else:
+            self.condition = Device.EXCELLENT
+            self.status = Device.CHECKED_IN
+
         self.lendee = None
         self.lender = None
         return self.save()
+
+    def check_out(self, lender, lendee):
+        '''Checks out a device.
+        '''
+        self.lendee = lendee
+        self.lender = lender
+        self.status = Device.CHECKED_OUT
+        return self.save()
+
 
     class Meta:
         abstract = True
@@ -126,14 +152,27 @@ class Ipad(Device):
         Changes status to Checked in - NOT READY instead 
         of just CHECKED_IN.
         """
-        self.condition = condition
-        self.status = Device.CHECKED_IN_NOT_READY
+        if condition == 'broken':
+            self.status = Device.BROKEN
+            self.condition = Device.BROKEN
+        elif condition == 'scratched':
+            self.status = Device.CHECKED_IN_NOT_READY
+            self.condition = Device.SCRATCHED
+        elif condition == 'missing':
+            self.condition = Device.MISSING
+            self.status = Device.MISSING
+        else:
+            self.condition = Device.EXCELLENT
+            self.status = Device.CHECKED_IN_NOT_READY
+
         self.lendee = None
         self.lender = None
         return self.save()
 
-    def get_cname(self):
+    def get_cname(self, plural=True):
+        if plural: return 'ipads'
         return 'ipad'
+
 
 class Headphones(Device):
     '''Headphones model.
@@ -159,7 +198,7 @@ class Headphones(Device):
         self.updated_at = timezone.now()
         return super(Headphones, self).save(*args, **kwargs)
 
-    def get_cname(self):
+    def get_cname(self, plural=True):
         return 'headphones'
 
 class Adapter(Device):
@@ -186,7 +225,8 @@ class Adapter(Device):
         self.updated_at = timezone.now()
         return super(Adapter, self).save(*args, **kwargs)
 
-    def get_cname(self):
+    def get_cname(self, plural=True):
+        if plural: return 'adapters'
         return 'adapter'
 
 
@@ -214,7 +254,8 @@ class Case(Device):
         self.updated_at = timezone.now()
         return super(Case, self).save(*args, **kwargs)
 
-    def get_cname(self):
+    def get_cname(self, plural=True):
+        if plural: return 'cases'
         return 'case'
 
 
