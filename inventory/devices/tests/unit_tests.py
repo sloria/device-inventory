@@ -42,6 +42,9 @@ class IpadTest(TestCase):
         assert_equal(self.ipad.status, Device.MISSING)
         assert_equal(self.ipad.condition, Device.MISSING)
 
+    def test_checkout_with_other_devices(self):
+        assert False, 'finish me'
+
 
 class HeadphonesTest(TestCase):
     def setUp(self):

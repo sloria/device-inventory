@@ -10,7 +10,6 @@ from inventory.devices.tests.factories import (IpadFactory, HeadphonesFactory,
     AdapterFactory, CaseFactory)
 from inventory.comments.tests.factories import (IpadCommentFactory, 
         HeadphonesCommentFactory, AdapterCommentFactory, CaseCommentFactory)
-from inventory.user.tests.factories import SubjectFactory
 from inventory.devices.models import Device, Ipad
 from inventory.user.models import Lendee
 
@@ -271,16 +270,18 @@ class TestAnExperimenter(WebTest):
         self._checkin(device, expected_status=Device.CHECKED_IN)
 
     def _checkout(self, device, lendee_str):
-        checkout_url = reverse('devices:checkout', args=('ipads', 
-                                                        device.pk))
+        device_type = device.get_cname(plural=True)  # e.g. 'ipads'
+        checkout_url = reverse('devices:checkout', 
+                        args=(device_type, device.pk))
         # goes to the checkout url
         self.app.post(checkout_url,
                         {'lendee' : lendee_str})
-        checkout_confirm_url = reverse('devices:checkout_confirm', args=('ipads', 
-                                                            device.pk))
+        checkout_confirm_url = reverse('devices:checkout_confirm', 
+                                args=(device_type, device.pk))
         # goes to checkout confirm url
         self.app.post(checkout_confirm_url,
-                    {'device_type': 'ipads', 'lendee': lendee_str},
+                    {'device_type': device_type,
+                    'lendee': lendee_str},
                      user=self.experimenter.user)
 
         # reload device
@@ -310,16 +311,25 @@ class TestAnExperimenter(WebTest):
     def test_can_checkout_to_subject_with_dashes(self):
         # an ipad is created
         device = IpadFactory(status=Device.CHECKED_IN_READY)
-        # a subject is created
-        SubjectFactory(subject_id='123451')
-        # checks out the device to the subject
+        # checks out the device to a subject by entering their subject id
         self._checkout(device, '1-23-451')
 
     def test_can_checkout_to_subject_without_dashes(self):
         # an ipad is created
         device = IpadFactory(status=Device.CHECKED_IN_READY)
-        # a subject is created
-        SubjectFactory(subject_id='123451')
-        # checks out the device to the subject
+        # checks out the device to a subject by entering their subject id
         self._checkout(device, '123451')
 
+    def test_can_checkout_headphones_to_user(self):
+        # headphones are created
+        device = HeadphonesFactory(status=Device.CHECKED_IN)
+        # user is created
+        user = UserFactory()
+        # checks out to user
+        self._checkout(device, user.username)
+
+    def test_can_checkout_headphones_to_subject(self):
+        # headphones are created
+        device = HeadphonesFactory(status=Device.CHECKED_IN)
+        # checks out to subject
+        self._checkout(device, '123451')

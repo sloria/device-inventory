@@ -1,5 +1,5 @@
+'''Functional tests for a reader user type'''
 from django_webtest import WebTest
-import unittest
 from nose.tools import *
 from inventory.user.tests.factories import ReaderFactory
 from inventory.devices.tests.factories import IpadFactory

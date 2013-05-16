@@ -19,7 +19,7 @@ env.code_dir = '/srv/www/inventory'
 env.project_dir = '/srv/www/inventory/inventory'
 env.static_root = '/srv/www/inventory/static/'
 env.virtualenv = '/srv/www/inventory/.virtualenv'
-env.code_repo = 'git@github.com:user/inventory.git'
+env.code_repo = 'git@github.com:sloria/inventory.git'
 env.django_settings_module = 'inventory.settings'
 
 # Python version

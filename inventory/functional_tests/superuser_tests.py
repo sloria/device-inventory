@@ -1,4 +1,4 @@
-'''Functional tests using WebTest'''
+'''Functional tests for the superuser user type'''
 
 from django.contrib.auth.models import User
 from django_webtest import WebTest
@@ -185,3 +185,6 @@ class TestASuperUser(WebTest):
         new_admin = User.objects.get(username='jimmy@example.com')
         assert_equal(new_admin.get_full_name(), 'Jimmy Page')
         assert_true(new_admin.is_superuser)
+
+    def test_can_delete_device(self):
+        assert False, 'finish me'
