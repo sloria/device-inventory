@@ -214,3 +214,9 @@ class TestAnExperimenter(WebTest):
     def test_can_checkin(self):
         assert False, 'finish me'
 
+    def test_can_checkout_to_user(self):
+        assert False, 'finish me'
+
+    def test_can_checkout_to_subject(self):
+        assert False, 'finish me'
+

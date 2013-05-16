@@ -12,7 +12,7 @@ from django.views.generic import (View, DetailView, TemplateView,
 from django.contrib.contenttypes.models import ContentType
 import verhoeff
 
-from inventory.devices.models import Ipad, Adapter, Headphones, Case
+from inventory.devices.models import Device, Ipad, Adapter, Headphones, Case
 from inventory.comments.models import (IpadComment, AdapterComment,
         HeadphonesComment, CaseComment)
 from inventory.user.models import Subject, Lendee
