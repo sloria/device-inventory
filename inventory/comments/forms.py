@@ -2,7 +2,8 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import *
 
-from inventory.comments.models import *
+from inventory.comments.models import (IpadComment,
+    AdapterComment, HeadphonesComment, CaseComment)
 
 
 class CommentUpdateForm(forms.ModelForm):
@@ -11,7 +12,6 @@ class CommentUpdateForm(forms.ModelForm):
     text = forms.CharField(label='Comment: ', widget=forms.Textarea,
                              max_length=500, required=True)
     class Meta:
-        model = Comment 
         fields = ('text',)
     
     def __init__(self, *args, **kwargs):
@@ -29,3 +29,8 @@ class CommentUpdateForm(forms.ModelForm):
             )
         )
         return super(CommentUpdateForm, self).__init__(*args, **kwargs)
+
+class IpadCommentUpdateForm(CommentUpdateForm):
+    class Meta:
+        model = IpadComment
+        fields = ('text',)
