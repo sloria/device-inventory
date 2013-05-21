@@ -20,5 +20,8 @@ django-debug-toolbar
 # Migrations
 South
 
+# Content versioning
+django-reversion
+
 # Various tidbits
 # commonware
