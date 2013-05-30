@@ -129,14 +129,14 @@
           confirmed = confirm("Confirm check out to " + data.name + "?");
           if (confirmed) {
             return $.ajax({
-              url: "" + window.base_url + device_type + "/" + pk + "/checkout/confirm/",
+              url: window.base_url + device_type + "/" + pk + "/checkout/confirm/",
               type: 'POST',
               data: {
                 'lendee': lendee,
                 'device_type': device_type
               },
               success: function(data) {
-                return window.location = "" + window.base_url + device_type + "/";
+                return window.location = window.base_url + device_type + "/";
               }
             });
           }
@@ -151,7 +151,7 @@
     selected = oTT.fnGetSelected(oTable);
     pk = get_selected_id(selected);
     device_type = get_selected_class(selected);
-    return window.location = "" + window.base_url + device_type + "/" + pk + "/checkin";
+    return window.location = window.base_url + device_type + "/" + pk + "/checkin";
   };
 
   $("#id_delete_btn").click(function(e) {
@@ -166,14 +166,14 @@
       pk = get_selected_id(selected);
       if (confirmed) {
         return $.ajax({
-          url: "" + window.base_url + pk + "/delete/",
+          url: window.base_url + pk + "/delete/",
           type: "POST",
           data: {
             'pk': pk,
             'device_type': get_selected_class(selected)
           },
           success: function(data) {
-            return window.location = "" + window.base_url;
+            return window.location = window.base_url;
           }
         });
       }
