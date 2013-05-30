@@ -50,7 +50,7 @@ initialize_table = () ->
                     'sExtends': 'text',
                     'sButtonClass': 'btn btn-large btn-warning btn-checkin',
                     'sButtonText': '<i class="icon-signin"></i> Check IN',
-                    "fnClick": (nButton, oConfig, oFlash) -> 
+                    "fnClick": (nButton, oConfig, oFlash) ->
                         selected = oTT.fnGetSelected(oTable)
                         pk = get_selected_id(selected)
                         # if user hasn't selected a device
@@ -76,7 +76,7 @@ initialize_table = () ->
                         else
                             pk = get_selected_id(selected)
                             device_class = get_selected_class(selected)
-                            window.location = "/devices/#{device_class}/#{pk}/"
+                            window.location = "#{window.base_url}#{device_class}/#{pk}/"
                 },
                 # Edit
                 {
@@ -91,7 +91,7 @@ initialize_table = () ->
                                 # redirect to device edit page
                                 pk = get_selected_id(selected)
                                 device_class = get_selected_class(selected)
-                                window.location = "/devices/#{device_class}/#{pk}/edit/"
+                                window.location = "#{window.base_url}#{device_class}/#{pk}/edit/"
                 },
                 # # Export csv
                 # {
@@ -109,12 +109,12 @@ checkout_selected = (lendee) ->
     pk = get_selected_id(selected)
     device_type = get_selected_class(selected)
     $.ajax(
-        url: "/devices/#{device_type}/#{pk}/checkout/"
+        url: "#{window.base_url}#{device_type}/#{pk}/checkout/"
         type: 'POST',
         data: {
             "lendee": lendee,
         },
-        success: (data) -> 
+        success: (data) ->
             if data.error
                 alert(data.error)
             else
@@ -122,7 +122,7 @@ checkout_selected = (lendee) ->
                 confirmed = confirm("Confirm check out to #{data.name}?")
                 if confirmed
                     $.ajax(
-                        url: "/devices/#{device_type}/#{pk}/checkout/confirm/",
+                        url: "#{window.base_url}#{device_type}/#{pk}/checkout/confirm/",
                         type: 'POST',
                         data: {
                             'lendee': lendee,
@@ -130,7 +130,7 @@ checkout_selected = (lendee) ->
                         },
                         success: (data) ->
                             # Refresh the page
-                            window.location = "/devices/#{device_type}/"       
+                            window.location = "#{window.base_url}#{device_type}/"
                     )
     )
 
@@ -138,22 +138,22 @@ checkin_selected = () ->
     selected = oTT.fnGetSelected(oTable)
     pk = get_selected_id(selected)
     device_type = get_selected_class(selected)
-    window.location = "/devices/#{device_type}/#{pk}/checkin"
+    window.location = "#{window.base_url}#{device_type}/#{pk}/checkin"
 
 
 # Add click handler for device delete button
 $("#id_delete_btn").click( (e) ->
     e.preventDefault()
     selected = oTT.fnGetSelected(oTable)
-    if selected.length < 1 
+    if selected.length < 1
         alert("No device selected.")
-    else 
+    else
         confirmed = confirm("Are you sure you want to delete this device?\n
 WARNING: This action is irreversible.")
         pk = get_selected_id(selected)
         if confirmed
             $.ajax(
-                url: "/devices/#{pk}/delete/",
+                url: "#{window.base_url}#{pk}/delete/",
                 type: "POST",
                 data: {
                     'pk': pk,
@@ -161,7 +161,7 @@ WARNING: This action is irreversible.")
                     }
                 success: (data) ->
                     # Refresh the page
-                    window.location = "/devices/"
+                    window.location = "#{window.base_url}"
             )
 )
 
