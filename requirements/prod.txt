@@ -25,3 +25,9 @@ django-reversion
 
 # Various tidbits
 # commonware
+
+# Command extensions
+django-extensions
+
+# Required for some reason
+django-nose
