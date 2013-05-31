@@ -1,0 +1,85 @@
+load 'deploy'
+
+set :user, "vack"
+set :run_as, "econ-game"
+set :application, "gates_inventory"
+set :repository,  "git://github.com/njvack/device-inventory.git"
+
+role :app, "camelot.keck.waisman.wisc.edu"
+set :use_sudo, false
+set :gateway, "tezpur.keck.waisman.wisc.edu"
+set :deploy_via, :export
+set :ssh_options , {:forward_agent => true}
+set :deploy_to, "/var/www/cap_deployments/#{application}"
+set :gunicorn_cmd, "#{shared_path}/bin/inventory_manager"
+
+desc <<-DESC
+  Show calculated config options
+DESC
+task :info do
+  puts "application: #{application}"
+  puts "repository: #{repository}"
+  puts "releases_path: #{releases_path}"
+  puts "shared_path: #{shared_path}"
+  puts "deploy_to: #{deploy_to}"
+  puts "current_path: #{current_path}"
+  puts "pidfile: #{pidfile}"
+  puts "gunicorn_cmd: #{gunicorn_cmd}"
+end
+
+after "deploy:update_code", "deploy:update_assets"
+
+namespace :deploy do
+  desc <<-DESC
+   Update scm_info.py, copies settings.py and .htaccess to their proper homes
+  DESC
+  task :finalize_update do
+    # And create a file with the current revision... (used in the models)
+#    scmfile = File.join(release_path, 'scm_info.py')
+#    full_url = "#{repository}@#{latest_revision}"
+#    run "echo \"REVISION=#{latest_revision}\" > #{scmfile}"
+#    run "echo \"REPOSITORY_URL=\\\"#{full_url}\\\"\" >> #{scmfile}"
+
+    run "cp -f #{shared_path}/system/local.py #{release_path}/inventory/settings/local.py"
+    run "cp -f #{shared_path}/system/.htaccess #{release_path}/inventory/base/static/.htaccess"
+    run "ln -sf #{shared_path}/log #{release_path}/log"
+    run ""
+    #run "ln -sf ../../.. #{release_path}/lib/python2.6/site-packages/#{application}"
+    #run "ln -sf ../../.. #{release_path}/lib/python2.6/site-packages/#{application}/inventory"
+  end
+
+  desc <<-DESC
+    Start a gunicorn instance to run the server
+  DESC
+  task :start do
+    default_run_options[:pty] = true
+    sudo "#{gunicorn_cmd} start", :as => run_as
+  end
+
+  desc <<-DESC
+    Kill our gunicorn instance
+  DESC
+  task :stop do
+    default_run_options[:pty] = true
+    sudo "#{gunicorn_cmd} stop", :as => run_as
+  end
+
+  desc <<-DESC
+    Restart gunicorn.
+  DESC
+  task :restart do
+    default_run_options[:pty] = true
+    sudo "#{gunicorn_cmd} restart", :as => run_as
+  end
+
+  desc "Collect and upload static assets"
+  task :update_assets do
+    run_locally "bundle exec rake assets:precompile"
+    find_servers_for_task(current_task).each do |s|
+      logger.info "deploying assets to #{s.to_s}"
+      run_locally "rsync -av ./static/ #{s.to_s}:#{shared_path}/static/"
+    end
+  end
+end
+
+after :deploy, "deploy:cleanup"
